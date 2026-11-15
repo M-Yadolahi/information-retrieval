@@ -1,0 +1,129 @@
+<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>الگوریتم پورتر (Porter Stemmer) | دفتر مطالعه</title><link rel="stylesheet" href="site.css"><link rel="stylesheet" href="course.css"><script src="progress.js" defer></script><script src="porter.js" defer></script></head><body><header class="site-header"><a class="brand" href="index.html">▤ دفتر مطالعه</a><nav><a href="index.html#lessons">فصل‌ها</a> · <a href="resources.html">منابع</a> · <a href="review.html">مرور</a></nav></header><main class="reading-layout"><aside class="toc"><span class="eyebrow">در این فصل</span><a href="#slide-1">تعاریف</a><a href="#slide-2">نمونه‌های محاسبه m</a><a href="#slide-3">قواعد فاز ۱</a><a href="#slide-4">Rule 1a: حذف یا تبدیل پسوند جمع</a><a href="#slide-5">Rule 1b: پسوندهای eed، ed و ing</a><a href="#slide-6">Rule 1c: تبدیل y پایانی</a><a href="#slide-7">محاسبهٔ دقیق m و شرط‌ها</a><a href="#slide-8">فازهای ۲ تا ۵: تکمیل قواعد</a><a href="#slide-9">ردگیری مرحله‌ای و دام امتحانی</a></aside><article class="lesson"><span class="eyebrow">فصل 3 / درس‌نامهٔ بازنویسی‌شده</span><h1>الگوریتم پورتر (Porter Stemmer)</h1><p class="source-note">مبنای فصل: <a href="bin/مبانی جست و جوی اطلاعات.pdf#page=11">صفحات ۶ تا ۱۴؛ پورتر ↗</a> و متن تایپ‌شدهٔ جزوه. توضیح‌ها و مثال‌های تکمیلی به متن افزوده شده‌اند؛ این صفحه رونویسی کلمه‌به‌کلمه نیست.</p><button class="print-button" onclick="window.print()">چاپ / ذخیره PDF</button><p>الگوریتم پورت یک ریشه‌یاب قاعده‌محور برای زبان انگلیسی است. این الگوریتم پسوندها را در چند مرحله حذف یا تبدیل می‌کند. در قواعد زیر، <code>m</code> معیار (Measure) است که ساختار توالی‌های حرف صدادار و بی‌صدا را در بخشی از کلمه می‌سنجد.</p>
+<h3 id="slide-1">تعاریف</h3>
+<ul>
+<li><strong>حروف صدادار (Vowels - V):</strong> حروف <code>a, e, i, o, u</code>؛ حرف <code>y</code> نیز هنگامی صدادار محسوب می‌شود که پیش از آن حرف بی‌صدا باشد.</li>
+<li><strong>حروف بی‌صدا (Consonants - C):</strong> سایر حروف، با در نظر گرفتن قاعده وابسته به جایگاه برای <code>y</code>.</li>
+<li><strong>ساختار کلی کلمه:</strong> <code>[C](VC)^m[V]</code>؛ در این نمایش، C و V گروه‌های متوالی بی‌صدا و صدادارند و <code>m</code> تعداد الگوهای کامل <code>VC</code> است. بخش‌های داخل کروشه اختیاری‌اند.</li>
+</ul>
+<h3 id="slide-2">نمونه‌های محاسبه m</h3>
+<table>
+<thead>
+<tr>
+<th>واژه</th>
+<th>الگوی حروف</th>
+<th style="text-align:right">مقدار <code>m</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>trouble</code></td>
+<td><code>C C V V C C V</code></td>
+<td style="text-align:right">1</td>
+</tr>
+<tr>
+<td><code>relational</code></td>
+<td><code>C V C V C V V C V C</code></td>
+<td style="text-align:right">4</td>
+</tr>
+<tr>
+<td><code>boy</code></td>
+<td><code>C V C</code></td>
+<td style="text-align:right">1</td>
+</tr>
+<tr>
+<td><code>sky</code></td>
+<td><code>C C V</code></td>
+<td style="text-align:right">0</td>
+</tr>
+</tbody>
+</table>
+<p>برای نمونه، در <code>trouble</code> بخش‌های صدادار و بی‌صدا در یک الگوی کامل <code>VC</code> قرار می‌گیرند، پس <code>m = 1</code> است. در <code>sky</code> الگوی کامل <code>VC</code> وجود ندارد و <code>m = 0</code> می‌شود.</p>
+<h3 id="slide-3">قواعد فاز ۱</h3>
+<h4 id="slide-4">Rule 1a: حذف یا تبدیل پسوند جمع</h4>
+<ul>
+<li><code>sses → ss</code>، مانند <code>caresses → caress</code></li>
+<li><code>ies → i</code>، مانند <code>ponies → poni</code></li>
+<li><code>ss → ss</code>، بدون تغییر</li>
+<li><code>s → ∅</code>، یعنی حذف <code>s</code> پایانی در شرایط قاعده</li>
+</ul>
+<h4 id="slide-5">Rule 1b: پسوندهای <code>eed</code>، <code>ed</code> و <code>ing</code></h4>
+<ul>
+<li><code>eed → ee</code>، اگر <code>m &gt; 0</code>؛ برای نمونه <code>agreed → agree</code>.</li>
+<li><code>(*v*)ed → ∅</code>: اگر پیش از <code>ed</code> در ساقه حداقل یک حرف صدادار باشد، <code>ed</code> حذف می‌شود.</li>
+<li><code>(*v*)ing → ∅</code>: اگر پیش از <code>ing</code> در ساقه حداقل یک حرف صدادار باشد، <code>ing</code> حذف می‌شود.</li>
+</ul>
+<p>پس از حذف <code>ed</code> یا <code>ing</code>، قواعد پاک‌سازی زیر اعمال می‌شوند:</p>
+<ul>
+<li>اگر ساقه به <code>at</code> ختم شود، <code>e</code> افزوده می‌شود: <code>at → ate</code>.</li>
+<li>اگر ساقه به <code>bl</code> ختم شود، <code>e</code> افزوده می‌شود: <code>bl → ble</code>.</li>
+<li>اگر ساقه به <code>iz</code> ختم شود، <code>e</code> افزوده می‌شود: <code>iz → ize</code>.</li>
+<li>اگر ساقه به حرف بی‌صدای تکراری ختم شود، یکی از دو حرف حذف می‌شود، <strong>به‌جز l و s و z</strong>؛ برای نمونه <code>hopp → hop</code> ولی <code>fall</code> بدون تغییر می‌ماند.</li>
+<li>اگر <code>m = 1</code> و ساقه به الگوی <code>CVC</code> ختم شود، به‌شرط آنکه حرف آخر <code>w</code>، <code>x</code> یا <code>y</code> نباشد، <code>e</code> افزوده می‌شود؛ نمونه‌ی رایج <code>fil → file</code> است.</li>
+</ul>
+<h4 id="slide-6">Rule 1c: تبدیل y پایانی</h4>
+<p>اگر واژه به <code>y</code> ختم شود و پیش از آن در بخش ساقه حرف صدادار وجود داشته باشد، <code>y → i</code> تبدیل می‌شود:</p>
+<ul>
+<li><code>happy → happi</code></li>
+<li><code>cry → cry</code>: در پورتر کلاسیک ساقهٔ <code>cr</code> صدادار ندارد، پس قاعده اجرا نمی‌شود. این مورد در متن تایپ‌شدهٔ اولیه به‌اشتباه <code>cri</code> آمده بود.</li>
+</ul>
+<blockquote>
+<p>مثال‌های این فصل مربوط به Porter کلاسیک هستند؛ خروجی نسخه‌های توسعه‌یافته می‌تواند متفاوت باشد. خروجی یک مرحله را با خروجی نهایی الگوریتم اشتباه نگیرید.</p>
+</blockquote>
+<h3 id="slide-7">محاسبهٔ دقیق m و شرط‌ها</h3>
+<p>در <code>[C](VC)^m[V]</code>، C و V گروه‌های متوالی بی‌صدا و صدادارند، نه لزوماً یک حرف. در شروع کلمه y بی‌صداست؛ در ادامه، وضعیت آن نسبت به حرف قبلی تعیین می‌شود. شرط m روی <strong>ساقهٔ قبل از پسوند مورد بررسی</strong> سنجیده می‌شود.</p>
+<pre><code class="language-text">trouble:    tr | ou | bl | e       → C V C V       → m=1
+relational: r | e | l | a | t | io | n | a | l → m=4
+boy:        b | o | y             → C V C         → m=1
+sky:        sk | y                → C V           → m=0
+</code></pre>
+<p>نماد <code>*v*</code> یعنی ساقه حداقل یک صدادار دارد؛ <code>*d</code> یعنی پایان با بی‌صدای تکراری؛ <code>*o</code> یعنی پایان CVC که آخرین حرف w یا x یا y نیست.</p>
+<h3 id="slide-8">فازهای ۲ تا ۵: تکمیل قواعد</h3>
+<p>این جدول مرور آموزشی قواعد است؛ فازهای ۲ و ۳ روی ساقه شرط <code>m &gt; 0</code> دارند. قواعد با ترتیب و انتخاب پسوند مناسب اجرا می‌شوند، نه جایگزینی آزاد همهٔ رشته‌ها.</p>
+<table>
+<thead>
+<tr>
+<th>فاز</th>
+<th>قواعد</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>۲</td>
+<td>ational→ate، tional→tion، enci→ence، anci→ance، izer→ize، abli→able، alli→al، entli→ent، eli→e، ousli→ous</td>
+</tr>
+<tr>
+<td>۲ (ادامه)</td>
+<td>ization→ize، ation→ate، ator→ate، alism→al، iveness→ive، fulness→ful، ousness→ous، aliti→al، iviti→ive، biliti→ble</td>
+</tr>
+<tr>
+<td>۳</td>
+<td>icate→ic، ative→∅، alize→al، iciti→ic، ical→ic، ful→∅، ness→∅</td>
+</tr>
+<tr>
+<td>۴</td>
+<td>اگر m&gt;1 باشد: حذف al، ance، ence، er، ic، able، ible، ant، ement، ment، ent، ou، ism، ate، iti، ous، ive، ize</td>
+</tr>
+<tr>
+<td>۴: ion</td>
+<td>حذف با شرط m&gt;1 و پایان ساقه به s یا t</td>
+</tr>
+<tr>
+<td>۵a</td>
+<td>حذف e نهایی اگر m&gt;1، یا m=1 و ساقه شرط CVC ویژه را نداشته باشد</td>
+</tr>
+<tr>
+<td>۵b</td>
+<td>تبدیل ll نهایی به l اگر m&gt;1 باشد</td>
+</tr>
+</tbody>
+</table>
+<h3 id="slide-9">ردگیری مرحله‌ای و دام امتحانی</h3>
+<pre><code class="language-text">caresses → caress                  (1a)
+hopping → hopp → hop               (1b + پاک‌سازی)
+filing → fil → file                (1b + افزودن e)
+agreed → agree → agre              (1b سپس 5a)
+relational → relate → relat        (2 سپس 5a)
+cry → cry                          (1c اجرا نمی‌شود)
+</code></pre>
+<p>در <code>agreed</code> قاعدهٔ eed انتخاب می‌شود؛ اگر شرط آن برقرار نبود نباید همان واژه را با قاعدهٔ کوتاه‌تر ed حذف کنیم. قواعد 1a، 1b، 1c به‌ترتیب اجرا می‌شوند و سپس فازهای بعدی می‌آیند.</p>
+<section id="porter-demo" class="porter-demo"><h2>پورتر را مرحله‌به‌مرحله اجرا کن</h2><p>ردگیری آموزشیِ پنج واژه در پورتر کلاسیک (۱۹۸۰)، نه Porter2. هر کلیک یک مرحله یا زیرمرحله را نشان می‌دهد؛ این بخش ورودی آزاد و موتور عمومی ریشه‌یابی نیست.</p><div class="porter-controls" hidden><label for="porter-word-select">واژهٔ نمونه</label> <select id="porter-word-select" dir="ltr"><option>caresses</option><option>hopping</option><option>filing</option><option>relational</option><option>cry</option></select><div class="porter-display" aria-live="polite" aria-atomic="true"><strong class="porter-stage"></strong><div class="porter-word" dir="ltr"></div><p class="porter-explanation"></p><small class="porter-counter"></small></div><progress max="7" value="0" aria-label="پیشرفت مراحل پورتر"></progress><div class="porter-buttons"><button type="button" data-porter="prev">مرحلهٔ قبل</button><button type="button" data-porter="next">مرحلهٔ بعد</button><button type="button" data-porter="reset">شروع دوباره</button></div><p>مسیر تغییر واژه (صورت‌های بدون تغییر تکرار نمی‌شوند):</p><p class="porter-trail" dir="ltr"></p><small>بخش خط‌خورده حذف می‌شود؛ بخش رنگی اضافه می‌شود. خروجی هر مرحله لزوماً خروجی نهایی نیست.</small></div><noscript>برای نمایش تعاملی، جاوااسکریپت را فعال کنید. مثال‌های متنی فصل بدون آن قابل مطالعه‌اند.</noscript></section><section class="self-test"><h2>خودت را بسنج · ۴ پرسش کوتاه</h2><p>بدون عجله جواب بده؛ هر پاسخ را جدا باز کن و با جواب خودت مقایسه کن.</p><div class="practice-grid"><div class="practice-card"><span class="eyebrow">1 / پرسش اصلی</span><p>چرا cry در پورتر کلاسیک تغییر نمی‌کند؟</p><details><summary>پاسخ را ببین</summary><p>ساقهٔ cr هیچ صداداری ندارد؛ شرط قاعدهٔ 1c برقرار نیست.</p></details></div><div class="practice-card"><span class="eyebrow">2 / گرم‌کردن</span><p>در گام 1a پورتر کلاسیک، caresses پس از تبدیل sses به ss چه می‌شود؟</p><details><summary>پاسخ را ببین</summary><p>caress؛ فقط پسوند sses به ss تبدیل می‌شود.</p></details></div><div class="practice-card"><span class="eyebrow">3 / یک مرحلهٔ کوتاه</span><p>پس از حذف ing از hopping، صورت میانی hopp است. پاک‌سازی بعدی چه می‌کند؟</p><details><summary>پاسخ را ببین</summary><p>یکی از دو p را حذف می‌کند و hop می‌سازد؛ p صامت تکراری است و جزو استثناهای l، s و z نیست.</p></details></div><div class="practice-card"><span class="eyebrow">4 / حالا تو بگو</span><p>وقتی شرط یک قاعده برقرار نیست، باید پسوند را به‌هرحال حذف کنیم؟</p><details><summary>پاسخ را ببین</summary><p>خیر؛ واژه در آن قاعده بدون تغییر می‌ماند. پورتر فقط حذف ظاهری پسوند نیست؛ شرط‌ها هم باید بررسی شوند.</p></details></div></div></section><label class="complete"><input type="checkbox" data-done="3"> این فصل را مطالعه کردم</label><div class="study-progress"><label for="lesson-study-meter">پیشرفت کل مطالعه: <span data-progress-label role="status" aria-live="polite">۰ از ۷ فصل</span></label><progress id="lesson-study-meter" data-study-meter max="7" value="0"></progress><small data-progress-note></small></div><nav class="chapter-nav"><a href="chapter-2.html">→ فصل قبل</a><a href="chapter-4.html">فصل بعد ←</a></nav></article></main><footer class="site-footer">بازیابی اطلاعات · بازنویسی آموزشی منابع ارسالی؛ مثال‌های افزوده برای یادگیری هستند.</footer></body></html>

@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IR - Vocabulary & Postings Lists</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --slide-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --accent-hover: #0284c7;
+            --border-color: #334155;
+            --nav-bg: rgba(15, 23, 42, 0.85);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Tahoma, "Vazirmatn", "Segoe UI", sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow: hidden; /* جلوگیری از اسکرول کل صفحه */
+        }
+
+        .en-text {
+            direction: ltr;
+            display: inline-block;
+            font-family: "Segoe UI", Tahoma, sans-serif;
+            color: var(--accent);
+        }
+
+        #presentation-container {
+            width: 100vw;
+            height: 100dvh; /* ارتفاع داینامیک برای موبایل */
+            position: relative;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease-in-out;
+            background-color: var(--bg-color);
+            padding: 80px 20px 80px; /* فضای بالا و پایین برای هدر و فوتر/نویگیشن */
+            overflow-y: auto; /* اسکرول داخلی برای محتوای طولانی در موبایل */
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            z-index: 10;
+        }
+
+        .slide-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: var(--slide-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        h1, h2 {
+            color: var(--accent);
+            margin-bottom: 20px;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        h1 { font-size: 1.8rem; }
+        h2 { font-size: 1.5rem; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
+
+        ul {
+            margin-right: 20px;
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+
+        li { margin-bottom: 12px; }
+
+        /* گرید واکنش‌گرا - تک‌ستونه در موبایل، دو ستونه در دسکتاپ */
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr 1fr;
+            }
+            h1 { font-size: 2.2rem; }
+            .slide-content { padding: 40px; }
+        }
+
+        .card {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .card h3 {
+            color: #fbbf24;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        /* نویگیشن */
+        .controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px 20px;
+            background: var(--nav-bg);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            border-top: 1px solid var(--border-color);
+        }
+
+        button {
+            background-color: var(--accent);
+            color: #0f172a;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover { background-color: var(--accent-hover); color: white; }
+        button:disabled { background-color: var(--border-color); color: var(--text-muted); cursor: not-allowed; }
+
+        .progress {
+            color: var(--text-main);
+            font-weight: bold;
+            direction: ltr; /* برای نمایش درست عدد (1 / 12) */
+        }
+        
+        code {
+            background: #000;
+            color: #a7f3d0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 1rem;
+        }
+    </style>
+    <link rel="stylesheet" href="../reader.css">
+</head>
+<body class="reader chapter-2">
+<nav class="reader-top" aria-label="ناوبری جزوه"><a href="../index.html">← فهرست درس‌ها</a><span>واژگان و لیست‌های پستینگ</span></nav>
+
+<div id="presentation-container">
+
+    <!-- اسلاید ۱ -->
+    <div class="slide active">
+        <div class="slide-content" style="text-align: center; margin-top: 10vh;">
+            <h1>بازیابی اطلاعات <span class="en-text">(Information Retrieval)</span></h1>
+            <br>
+            <h2 style="border:none;">فصل دوم: واژگان و لیست‌های پستینگ</h2>
+            <br>
+            <p style="color: var(--text-muted); font-size: 1.2rem;">The term vocabulary and postings lists</p>
+            <br><br>
+            <div class="card" style="display: inline-block; text-align: right;">
+                <ul>
+                    <li>چالش‌های استخراج سند <span class="en-text">(Documents)</span></li>
+                    <li>توکن‌سازی و نرمال‌سازی <span class="en-text">(Terms & Tokens)</span></li>
+                    <li>اشاره‌گرهای پرش <span class="en-text">(Skip Pointers)</span></li>
+                    <li>پرس‌وجوهای عبارتی <span class="en-text">(Phrase Queries)</span></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- اسلاید ۲ -->
+    <div class="slide">
+        <div class="slide-content">
+            <h2>سند چیست؟ <span class="en-text">(What is a Document?)</span></h2>
+            <p>قبل از پردازش، باید بدانیم <strong>واحد سند</strong> چیست. این کار در واقعیت پیچیده است:</p>
+            <div class="grid-container">
+                <div class="card">
+                    <h3>فرمت‌ها <span class="en-text">(Format/Parsing)</span></h3>
+                    <p>اسناد در فرمت‌های مختلفی مانند PDF، Word، Excel و HTML هستند. استخراج متن از هرکدام نیازمند ابزارهای متفاوت است.</p>
+                </div>
+                <div class="card">
+                    <h3>زبان‌ها <span class="en-text">(Languages)</span></h3>
+                    <p>یک سند (مثل ایمیل) ممکن است شامل متنی به زبان فرانسوی و پیوستی به زبان اسپانیایی باشد. تعیین زبان (Classification) بسیار مهم است.</p>
+                </div>
+            </div>
+            <ul style="margin-top:20px;">
+                <li>آیا یک فایل منفرد یک سند است؟</li>
+                <li>آیا ایمیل به همراه ۵ فایل پیوست یک سند محسوب می‌شود؟</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- اسلاید ۳ -->
+    <div class="slide">
+        <div class="slide-content">
+            <h2>تعاریف پایه: واژه، توکن و ترم</h2>
+            <p>در IR تفاوت‌های ظریفی بین اجزای متن وجود دارد:</p>
+            <br>
+            <ul>
+                <li><span class="en-text"><strong>Word:</strong></span> یک رشته محدودشده از کاراکترها دقیقاً همان‌طور که در متن آمده است.</li>
+                <li><span class="en-text"><strong>Term:</strong></span> یک واژه‌ی نرمال‌شده (Normalized)؛ یک کلاس هم‌ارزی از واژه‌ها.</li>
+                <li><span class="en-text"><strong>Token:</strong></span> یک نمونه‌ی واقعی (Instance) از یک واژه یا ترم که درون یک سند خاص رخ داده است.</li>
+                <li><span class="en-text"><strong>Type:</strong></span> در بیشتر موارد معادل Term است و به کلاس توکن‌ها اشاره دارد.</li>
+            </ul>
+            <div class="card" style="margin-top: 20px;">
+                <strong>مثال:</strong> در جمله‌ی <span class="en-text">"the dog likes to chase the cat"</span>، ما ۷ عدد <span class="en-text">Token</span> و ۶ عدد <span class="en-text">Type / Term</span> داریم (کلمه‌ی the دو بار تکرار شده).
+            </div>
+        </div>
+    </div>
+
+    <!-- اسلاید ۴ -->
+    <div class="slide">
+        <div class="slide-content">
+            <h2>چالش‌های توکن‌سازی <span class="en-text">(Tokenization)</span></h2>
+            <p>تبدیل متن خام به توکن‌ها همیشه ساده نیست. چه چیزی یک کلمه محسوب می‌شود؟</p>
+            <div class="grid-container">
+                <div class="card">
+                    <h3>خط تیره‌ها <span class="en-text">(Hyphens)</span></h3>
+                    <ul>
+                        <li><code>Hewlett-Packard</code> (یک کلمه؟)</li>
+                        <li><code>State-of-the-art</code></li>
+                        <li><code>co-education</code></li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>فاصله‌ها و نام‌ها <span class="en-text">(Spaces)</span></h3>
+                    <ul>
+                        <li><code>San Francisco</code> (دو کلمه یا یک مفهوم؟)</li>
+                        <li><code>York University</code> در مقابل <code>New York University</code></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card" style="margin-top: 15px;">
+                <h3>اعداد <span class="en-text">(Numbers)</span></h3>
+                <p>تاریخ‌ها (<code>3/20/91</code>)، آدرس‌های IP (<code>100.2.86.144</code>) و شماره تلفن‌ها. سیستم‌های مدرن برخلاف گذشته، اعداد را نیز ایندکس می‌کنند.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- اسلاید ۵ -->
+    <div class="slide">
+        <div class="slide-content">
+            <h2>چالش در زبان‌های غیرانگلیسی</h2>
+            <div class="grid-container">
+                <div class="card">
+                    <h3>چینی و ژاپنی</h3>
+                    <p>در این زبان‌ها <strong>فاصله (Space)</strong> بین کلمات وجود ندارد. توکن‌سازی (Segmentation) می‌تواند مبهم باشد.</p>
+                    <p>در ژاپنی از ۴ نوع نگارش (کانجی، هیراگانا، کاتاکانا و لاتین) همزمان استفاده می‌شود.</p>
+                </div>
+                <div class="card">
+                    <h3>عربی و فارسی</h3>
+                    <p>چالش دوجهته بودن <span class="en-text">(Bidirectionality)</span>. متن ممکن است شامل کلمات لاتین باشد که جهت خواندن (راست به چپ / چپ به راست) را مدام تغییر دهد.</p>
+                </div>
+                <div class="card">
+                    <h3>آلمانی و هلندی</h3>
+                    <p>کلمات مرکب به هم چسبیده (Compounds). مثال: <code>Computerlinguistik</code> که باید به <code>Computer + Linguistik</code> تجزیه شود.</p>
+                </div>
+                <div class="card">
+                    <h3>لهجه‌ها <span class="en-text">(Accents & Diacritics)</span></h3>
+                    <p>مانند <code>résumé</code> در برابر <code>resume</code>. معیار مهم: <em>کاربران معمولاً کوئری را چگونه تایپ می‌کنند؟</em></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- اسلاید ۶ -->
+    <div class="slide">
+        <div class="slide-content">
+            <h2>نرمال‌سازی <span class="en-text">(Normalization)</span></h2>
+            <p>هدف از نرمال‌سازی، یکسان کردن ترم‌های درون متن با ترم‌های کوئری کاربر است.</p>
+            <ul>
+                <li><strong>تطبیق حروف <span class="en-text">(Case folding)</span>:</strong> معمولاً همه حروف کوچک (Lowercase) می‌شوند. استثناهایی مانند <code>MIT</code> در برابر <code>mit</code> وجود دارد، اما چون کاربر معمولاً حروف کوچک سرچ می‌کند، Case Folding کلی بهینه‌تر است.</li>
+                <li><strong>کلاس‌های هم‌ارزی <span class="en-text">(Equivalence Classing)</span>:</strong>
+                    <ul>
+                        <li>آوایی <span class="en-text">(Soundex)</span>: مانند <code>Muller = Mueller</code></li>
+                        <li>معنایی <span class="en-text">(Thesauri)</span>: مانند <code>car = automobile</code></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- اسلاید ۷ -->
+    <div class="slide">
+        <div class="slide-content">
+            <h2>کلمات توقف <span class="en-text">(Stop Words)</span></h2>
+            <p>واژه‌های فوق‌العاده پرتکرار که ارزش معنایی کمی برای متمایز کردن اسناد دارند.</p>
+            <div class="card" style="margin: 20px 0;">
+                <p><strong>مثال‌ها:</strong> <code>a, an, and, are, as, at, be, by, the, to, is</code></p>
+            </div>
+            <ul>
+                <li>در سیستم‌های قدیمی IR، حذف این کلمات استاندارد بود تا حجم ایندکس کاهش یابد.</li>
+                <li><strong>چرا امروزه حذف نمی‌شوند؟</strong> برای کوئری‌های عبارتی (Phrase Queries) ضروری هستند. (مثال: جستجوی <code>"King of Denmark"</code> یا <code>"To be or not to be"</code>).</li>
+                <li>بیشتر موتورهای جستجوی وب امروزی Stop Word ها را ایندکس می‌کنند.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- اسلاید ۸ -->
+    <div class="slide">
+        <div class="slide-content">
+            <h2>ریشه‌یابی و لماتیزاسیون</h2>
+            <p>کاهش فرم‌های مختلف یک کلمه به ریشه اصلی آن برای افزایش دایره تطبیق (Recall).</p>
+            <div class="grid-container">
+                <div class="card">
+                    <h3>لماتیزاسیون <span class="en-text">(Lemmatization)</span></h3>
+                    <p>کاهش اصولی کلمه به پایه واژه‌نامه‌ای (Lemma) با استفاده از دانش زبان‌شناسی.</p>
+                    <ul style="margin-top: 10px; font-size: 0.95rem;">
+                        <li><code>am, are, is &rarr; be</code></li>
+                        <li><code>car, cars, car's &rarr; car</code></li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>ریشه‌یابی <span class="en-text">(Stemming)</span></h3>
+                    <p>یک فرآیند خام (Heuristic) که انتهای کلمات را برش می‌دهد. وابسته به زبان است.</p>
+                    <ul style="margin-top: 10px; font-size: 0.95rem;">
+                        <li><code>automate, automatic, automation &rarr; automat</code></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- اسلاید ۹ -->
+    <div class="slide">
+        <div class="slide-content">
+            <h2>الگوریتم پورتر <span class="en-text">(Porter Stemmer)</span></h2>
+            <p>رایج‌ترین و معروف‌ترین الگوریتم Stemming برای زبان انگلیسی که بر اساس <strong>مجموعه‌ای از قواعد و ۵ فاز متوالی</strong> کار می‌کند.</p>
+            <div class="card" style="margin-top: 20px;">
+                <h3>نمونه قواعد فازها:</h3>
+                <ul>
+                    <li><code>SSES &rarr; SS</code> <span class="en-text">(caresses &rarr; caress)</span></li>
+                    <li><code>IES &rarr; I</code> <span class="en-text">(ponies &rarr; poni)</span></li>
+                    <li><code>SS &rarr; SS</code> <span class="en-text">(caress &rarr; caress)</span></li>
+                    <li><code>S &rarr; &epsilon;</code> <span class="en-text">(cats &rarr; cat)</span></li>
+                </ul>
+            </div>
+            <p style="margin-top: 20px;"><strong>آیا Stemming اثربخشی را بالا می‌برد؟</strong> برای برخی کوئری‌ها بله (مانند <code>[tartan sweaters]</code>) و برای برخی دیگر ممکن است نتایج نامرتبط ایجاد کند.</p>
+        </div>
+    </div>
+
+    <!-- اسلاید ۱۰ -->
+    <div class="slide">
+        <div class="slide-content">
+            <h2>بهینه‌سازی اشتراک: <span class="en-text">Skip Pointers</span></h2>
+            <p>هنگام یافتن اشتراک (AND) بین دو لیست پستینگ (Postings Lists)، بررسی همه آیتم‌ها زمان‌بر است.</p>
+            <ul>
+                <li><strong>اشاره‌گرهای پرش (Skip Pointers):</strong> به ما اجازه می‌دهند بخش‌هایی از لیست را که قطعا در نتیجه نیستند، نادیده بگیریم و از روی آن‌ها «بپریم».</li>
+                <li><strong>چالش (Trade-off):</strong> 
+                    <ul>
+                        <li>تعداد پرش بیشتر = طول پرش کمتر (پیدا کردن سریع‌تر مسیر اما پرش‌های کوتاه)</li>
+                        <li>تعداد پرش کمتر = طول پرش بیشتر (رد کردن حجم زیادی از دیتا اما احتمال پرش از روی هدف)</li>
+                    </ul>
+                </li>
+                <li><strong>راهکار ساده:</strong> برای لیستی با طول P، از اشاره‌گرهای هم‌فاصله (مثلاً هر $\sqrt{P}$ آیتم) استفاده می‌شود.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- اسلاید ۱۱ -->
+    <div class="slide">
+        <div class="slide-content">
+            <h2>کوئری‌های عبارتی <span class="en-text">(Phrase Queries)</span></h2>
+            <p>حدود ۱۰٪ جستجوهای وب عبارتی هستند. (مثل <code>"stanford university"</code>). ذخیره صرف ID سند در پستینگ لیست دیگر کافی نیست.</p>
+            <div class="card" style="margin-top: 15px;">
+                <h3>ایندکس‌های کلمات دوتایی <span class="en-text">(Biword Indexes)</span></h3>
+                <p>ایندکس کردن هر جفت کلمه متوالی به عنوان یک ترم.</p>
+                <p>مثال: <code>Friends, Romans, Countrymen</code> تبدیل می‌شود به ترم‌های:</p>
+                <ul>
+                    <li><span class="en-text">"friends romans"</span></li>
+                    <li><span class="en-text">"romans countrymen"</span></li>
+                </ul>
+                <p><strong>مشکلات:</strong> بزرگ شدن شدید حجم واژگان (Index Blowup) و تولید نتایج مثبت کاذب (False Positives).</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- اسلاید ۱۲ -->
+    <div class="slide">
+        <div class="slide-content">
+            <h2>ایندکس‌های موقعیتی <span class="en-text">(Positional Indexes)</span></h2>
+            <p>جایگزینی بسیار کارآمدتر برای Biword. در این روش، علاوه بر ID سند، <strong>موقعیت (Position)</strong> دقیق هر کلمه در آن سند ذخیره می‌شود.</p>
+            <div class="card" style="margin: 15px 0;">
+                <p dir="ltr" style="text-align: left;">
+                    <code>TO: doc4: &lt;8, 16, 190, 429&gt;</code><br>
+                    <code>BE: doc4: &lt;17, 191, 291, 430&gt;</code>
+                </p>
+            </div>
+            <ul>
+                <li>برای یافتن <code>"to be"</code>، موقعیت کلمه BE در سند باید دقیقاً یک واحد بیشتر از کلمه TO باشد (مثلاً 16 و 17).</li>
+                <li><strong>جستجوی مجاورتی <span class="en-text">(Proximity Search)</span>:</strong> امکان کوئری‌هایی مانند <code>employment /4 place</code> (دو کلمه با فاصله حداکثر ۴ کلمه از هم).</li>
+                <li>کوئری‌های موقعیتی پردازش سنگین‌تری نسبت به جستجوی بولی ساده دارند. موتورهای جستجو معمولاً ترکیبی از Biword (برای اسامی معروف) و Positional را استفاده می‌کنند.</li>
+            </ul>
+        </div>
+    </div>
+
+</div>
+
+<!-- پنل کنترل پایین -->
+<div class="controls">
+    <button id="prevBtn" onclick="changeSlide(-1)">قبلی</button>
+    <div class="progress" id="progressText">1 / 12</div>
+    <button id="nextBtn" onclick="changeSlide(1)">بعدی</button>
+</div>
+
+<script src="../reader.js"></script>
+
+</body>
+</html>

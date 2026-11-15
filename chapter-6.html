@@ -1,0 +1,61 @@
+<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ساختارهای دیکشنری (Dictionary Structures & Look-up) | دفتر مطالعه</title><link rel="stylesheet" href="site.css"><link rel="stylesheet" href="course.css"><script src="progress.js" defer></script></head><body><header class="site-header"><a class="brand" href="index.html">▤ دفتر مطالعه</a><nav><a href="index.html#lessons">فصل‌ها</a> · <a href="resources.html">منابع</a> · <a href="review.html">مرور</a></nav></header><main class="reading-layout"><aside class="toc"><span class="eyebrow">در این فصل</span><a href="#slide-1">معیارهای انتخاب ساختار</a><a href="#slide-2">ساختارهای داده</a><a href="#slide-3">مفاهیم TF و DF</a><a href="#slide-4">TF، DF و CF با مثال عددی</a><a href="#slide-5">انتخاب ساختار در عمل</a></aside><article class="lesson"><span class="eyebrow">فصل 6 / درس‌نامهٔ بازنویسی‌شده</span><h1>ساختارهای دیکشنری (Dictionary Structures & Look-up)</h1><p class="source-note">مبنای فصل: <a href="bin/1000025346.jpg">عکس جزوه؛ دیکشنری و بسامد ↗</a> و متن تایپ‌شدهٔ جزوه. توضیح‌ها و مثال‌های تکمیلی به متن افزوده شده‌اند؛ این صفحه رونویسی کلمه‌به‌کلمه نیست.</p><button class="print-button" onclick="window.print()">چاپ / ذخیره PDF</button><p>دیکشنری در سامانه بازیابی اطلاعات، واژه‌ها یا اصطلاحات موجود در واژگان ایندکس‌شده را نگهداری می‌کند و امکان یافتن اطلاعات مربوط به هر اصطلاح را می‌دهد. انتخاب ساختار به نیازهای سامانه وابسته است.</p>
+<h3 id="slide-1">معیارهای انتخاب ساختار</h3>
+<ol>
+<li><strong>ثابت یا پویا بودن اندازه واژگان:</strong> آیا واژه‌های جدید مرتب اضافه یا حذف می‌شوند؟</li>
+<li><strong>فرکانس دسترسی و سرعت جست‌وجو:</strong> جست‌وجوی واژه‌ها با چه نرخ و تأخیری انجام می‌شود؟</li>
+<li><strong>توزیع فرکانس کلمات:</strong> آیا دسترسی به تعداد کمی از واژه‌ها بسیار پرتکرار است؟</li>
+</ol>
+<h3 id="slide-2">ساختارهای داده</h3>
+<table>
+<thead>
+<tr>
+<th>ساختار</th>
+<th>ویژگی‌ها</th>
+<th>محدودیت یا کاربرد</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>جدول درهم‌سازی (Hash Table)</strong></td>
+<td>زمان جست‌وجوی میانگین <code>O(1)</code> در شرایط مناسب</td>
+<td>احتمال تصادم دارد؛ جست‌وجوی بازه‌ای و پیشوندی را به‌طور طبیعی پشتیبانی نمی‌کند</td>
+</tr>
+<tr>
+<td><strong>درخت جست‌وجوی دودویی</strong></td>
+<td>نگهداری مرتب کلیدها و امکان پیمایش ترتیبی</td>
+<td>در صورت نامتوازن شدن، جست‌وجو می‌تواند کند شود</td>
+</tr>
+<tr>
+<td><strong>درخت متوازن</strong></td>
+<td>ارتفاع کنترل‌شده و جست‌وجوی معمولاً <code>O(log V)</code> برای <code>V</code> کلید</td>
+<td>نگهداری و متوازن‌سازی ساختار هزینه دارد</td>
+</tr>
+<tr>
+<td><strong>درخت B-Tree</strong></td>
+<td>مناسب ذخیره‌سازی دیسکی و کاهش تعداد دسترسی‌های صفحه‌ای</td>
+<td>پشتیبانی مناسب از جست‌وجوی مرتب و بازه‌ای؛ می‌توان برای یافتن بازه‌های پیشوندی از ترتیب واژه‌ها بهره برد</td>
+</tr>
+</tbody>
+</table>
+<h3 id="slide-3">مفاهیم TF و DF</h3>
+<ul>
+<li><strong>TF (Term Frequency):</strong> تعداد دفعات حضور یک واژه در یک سند؛ معمولاً با <code>tf(t, d)</code> نمایش داده می‌شود.</li>
+<li><strong>DF (Document Frequency):</strong> تعداد اسنادی که واژه <code>t</code> در آن‌ها دست‌کم یک‌بار آمده است؛ معمولاً با <code>df(t)</code> نمایش داده می‌شود.</li>
+</ul>
+<p>به‌طور خلاصه:</p>
+<pre><code class="language-text">df(t) = number of documents containing t
+</code></pre>
+<p>برای نمونه، اگر واژه‌ای چهار بار در یک سند ظاهر شود، <code>tf</code> آن در آن سند 4 است؛ اما آن سند فقط یک واحد به <code>df</code> واژه اضافه می‌کند.</p>
+<h3 id="slide-4">TF، DF و CF با مثال عددی</h3>
+<pre><code class="language-text">d1: data data mining
+d2: data class
+d3: mining
+TF(data,d1)=2
+DF(data)=2
+CF(data)=3
+</code></pre>
+<p>CF تعداد کل رخدادهای یک ترم در مجموعه است و برابر مجموع TF آن روی همهٔ اسناد است. در postings ساده طول فهرست برابر DF است، نه CF. همیشه <code>df(t) ≤ N</code> و <code>cf(t) ≥ df(t)</code> برقرار است.</p>
+<h3 id="slide-5">انتخاب ساختار در عمل</h3>
+<p>Hash برای تطابق کامل مناسب است ولی ترتیب واژگان را به‌طور طبیعی نگه نمی‌دارد. جست‌وجوی میانگین O(1) به تابع هش و ضریب بار مناسب وابسته است؛ زمان بدترین حالت می‌تواند خطی باشد. BST نامتوازن نیز می‌تواند O(V) شود. درخت متوازن جست‌وجوی O(log V) دارد؛ B-Tree با شاخه‌زایی زیاد برای کاهش I/O صفحه‌ای مناسب است.</p>
+<p>برای جست‌وجوی پیشوندی ابتدا ابتدای بازهٔ مرتب پیدا می‌شود و سپس نتایج خوانده می‌شوند؛ هزینهٔ خروجی نتایج را نباید از محاسبهٔ زمان حذف کرد.</p>
+<section class="self-test"><h2>خودت را بسنج · ۴ پرسش کوتاه</h2><p>بدون عجله جواب بده؛ هر پاسخ را جدا باز کن و با جواب خودت مقایسه کن.</p><div class="practice-grid"><div class="practice-card"><span class="eyebrow">1 / پرسش اصلی</span><p>یک واژه ۴ بار در d1 و ۲ بار در d2 است؛ DF و CF چیست؟</p><details><summary>پاسخ را ببین</summary><p>DF=2 و CF=6؛ TF در d1 برابر 4 است.</p></details></div><div class="practice-card"><span class="eyebrow">2 / گرم‌کردن</span><p>واژه‌ای 5 بار در یک سند آمده است. TF خام آن در همان سند چقدر است؟</p><details><summary>پاسخ را ببین</summary><p>5؛ TF خام تعداد رخدادهای واژه در یک سند است.</p></details></div><div class="practice-card"><span class="eyebrow">3 / درست یا نادرست؟</span><p>اگر یک واژه 100 بار فقط در یک سند آمده باشد، DF آن 100 است.</p><details><summary>پاسخ را ببین</summary><p>نادرست؛ DF=1 و CF=100 است. DF اسناد متفاوت را می‌شمارد، نه تکرار واژه را.</p></details></div><div class="practice-card"><span class="eyebrow">4 / یک محاسبهٔ کوتاه</span><p>در مجموعه‌ای با 20 سند، آیا DF یک واژه می‌تواند 21 باشد؟</p><details><summary>پاسخ را ببین</summary><p>خیر؛ DF هیچ واژه‌ای از تعداد کل اسناد بیشتر نمی‌شود.</p></details></div></div></section><label class="complete"><input type="checkbox" data-done="6"> این فصل را مطالعه کردم</label><div class="study-progress"><label for="lesson-study-meter">پیشرفت کل مطالعه: <span data-progress-label role="status" aria-live="polite">۰ از ۷ فصل</span></label><progress id="lesson-study-meter" data-study-meter max="7" value="0"></progress><small data-progress-note></small></div><nav class="chapter-nav"><a href="chapter-5.html">→ فصل قبل</a><a href="chapter-7.html">فصل بعد ←</a></nav></article></main><footer class="site-footer">بازیابی اطلاعات · بازنویسی آموزشی منابع ارسالی؛ مثال‌های افزوده برای یادگیری هستند.</footer></body></html>

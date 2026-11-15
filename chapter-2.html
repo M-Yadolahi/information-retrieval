@@ -1,0 +1,60 @@
+<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ریشه‌یابی: Lemmatization در برابر Stemming | دفتر مطالعه</title><link rel="stylesheet" href="site.css"><link rel="stylesheet" href="course.css"><script src="progress.js" defer></script></head><body><header class="site-header"><a class="brand" href="index.html">▤ دفتر مطالعه</a><nav><a href="index.html#lessons">فصل‌ها</a> · <a href="resources.html">منابع</a> · <a href="review.html">مرور</a></nav></header><main class="reading-layout"><aside class="toc"><span class="eyebrow">در این فصل</span><a href="#slide-1">مثال نرمال‌سازی پرس‌وجو و سند</a><a href="#slide-2">Token، Type و Term را جدا کنیم</a><a href="#slide-3">مرز سند و توکن‌سازی</a><a href="#slide-4">نرمال‌سازی فارسی و کلمات توقف</a><a href="#slide-5">خطاهای ریشه‌یابی</a></aside><article class="lesson"><span class="eyebrow">فصل 2 / درس‌نامهٔ بازنویسی‌شده</span><h1>ریشه‌یابی: Lemmatization در برابر Stemming</h1><p class="source-note">مبنای فصل: <a href="bin/مبانی جست و جوی اطلاعات.pdf#page=12">صفحات ۱۲، ۱۵ و ۱۶؛ پردازش متن ↗</a> و متن تایپ‌شدهٔ جزوه. توضیح‌ها و مثال‌های تکمیلی به متن افزوده شده‌اند؛ این صفحه رونویسی کلمه‌به‌کلمه نیست.</p><button class="print-button" onclick="window.print()">چاپ / ذخیره PDF</button><p>هر دو روش صورت‌های مختلف یک واژه را برای جست‌وجو نرمال می‌کنند، اما از نظر زبانی و دقت یکسان نیستند.</p>
+<table>
+<thead>
+<tr>
+<th>ویژگی</th>
+<th>Lemmatization</th>
+<th>Stemming</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>روش کار</strong></td>
+<td>بازگرداندن واژه به بن‌واژه بر مبنای واژه‌نامه و قواعد لغوی</td>
+<td>حذف پسوند یا پیشوند با قواعد ساده، بدون توجه کامل به ساختار زبان</td>
+</tr>
+<tr>
+<td><strong>دستور زبان</strong></td>
+<td>در نظر گرفته می‌شود</td>
+<td>معمولاً در نظر گرفته نمی‌شود</td>
+</tr>
+<tr>
+<td><strong>بار معنایی</strong></td>
+<td>معمولاً حفظ می‌شود</td>
+<td>ممکن است نادیده گرفته شود</td>
+</tr>
+<tr>
+<td><strong>هزینه پردازش</strong></td>
+<td>معمولاً بیشتر به‌دلیل تحلیل زبانی</td>
+<td>معمولاً کمتر به‌دلیل قواعد ساده</td>
+</tr>
+<tr>
+<td><strong>اثر بر کیفیت بازیابی</strong></td>
+<td>وابسته به زبان، داده و پرس‌وجو؛ تضمینی نیست</td>
+<td>ممکن است Recall را بیشتر و Precision را کمتر کند؛ تضمینی نیست</td>
+</tr>
+</tbody>
+</table>
+<h3 id="slide-1">مثال نرمال‌سازی پرس‌وجو و سند</h3>
+<ul>
+<li><code>q</code>: <code>the students are studying data mining</code> → <code>student be study data mining</code></li>
+<li><code>D1</code>: <code>student studies data mining</code> → <code>student study data mining</code></li>
+<li><code>D2</code>: <code>student studied data mining</code> → <code>student study data mining</code></li>
+<li><code>D3</code>: <code>student is studying data mining</code> → <code>student be study data mining</code></li>
+</ul>
+<p>در این مثال، نرمال‌سازی صورت‌های مختلف واژه‌هایی مانند <code>students</code>، <code>studies</code> و <code>studying</code> کمک می‌کند اسناد مرتبط با یک پرس‌وجو بهتر پیدا شوند. بسته به روش و قواعد مورد استفاده، خروجی دقیق نرمال‌سازی می‌تواند متفاوت باشد.</p>
+<h3 id="slide-2">Token، Type و Term را جدا کنیم</h3>
+<p>Token هر رخداد در متن، Type شکل متمایز توکن، و Term واحد نهایی واردشده به واژگان ایندکس است. پس Type و Term همیشه برابر نیستند.</p>
+<pre><code class="language-text">cat dog cat bird dog cat
+Tokens = 6
+Types = 3  → {cat, dog, bird}
+</code></pre>
+<p>در <code>Dog dog dogs</code> پیش از کوچک‌سازی سه Type داریم؛ بعد از کوچک‌سازی دو شکل و بعد از یکسان‌سازی جمع ممکن است یک Term باقی بماند.</p>
+<h3 id="slide-3">مرز سند و توکن‌سازی</h3>
+<p>پیش از ایندکس باید تعیین شود یک ایمیل و پیوست‌هایش یک سندند یا چند سند. استخراج متن PDF با HTML یکسان نیست؛ PDF اسکن‌شده ممکن است به OCR نیاز داشته باشد. فاصله معیار همیشگی مرز واژه نیست: نام‌هایی مثل <code>New York</code>، کلمات خط‌تیره‌دار و زبان‌های بدون فاصله تصمیم‌های ویژه می‌خواهند.</p>
+<h3 id="slide-4">نرمال‌سازی فارسی و کلمات توقف</h3>
+<p>یکسان‌سازی «ي/ی» و «ك/ک»، اعراب، کشیده و نیم‌فاصله به کاهش اختلاف نوشتاری کمک می‌کند. همان خط لوله باید روی سند و پرس‌وجو اعمال شود. حذف کورکورانهٔ همهٔ فاصله‌ها یا علائم می‌تواند معنی را خراب کند.</p>
+<p>حذف کلمات توقف اختیاری است؛ برای عبارت‌هایی مانند <code>to be or not to be</code> این کلمات مهم‌اند. اگر حذف انجام شود، برای جست‌وجوی موقعیتی نباید فاصله‌های اصلی توکن‌ها بی‌دلیل فشرده شوند. نگهداری توقف‌واژه‌ها و استفاده از وزن‌دهی، گزینهٔ دیگری است.</p>
+<h3 id="slide-5">خطاهای ریشه‌یابی</h3>
+<p><strong>Over-stemming:</strong> ادغام واژه‌های متفاوت و احتمال کاهش Precision. <strong>Under-stemming:</strong> جدا ماندن صورت‌های مرتبط و احتمال کاهش Recall. ریشه‌یابی لزوماً واژهٔ معتبر تولید نمی‌کند؛ مثلاً <code>ponies → poni</code> ایراد اجرایی نیست. لماتیزاسیون ممکن است به نقش دستوری نیاز داشته باشد: <code>saw</code> می‌تواند اسم یا گذشتهٔ see باشد.</p>
+<section class="self-test"><h2>خودت را بسنج · ۴ پرسش کوتاه</h2><p>بدون عجله جواب بده؛ هر پاسخ را جدا باز کن و با جواب خودت مقایسه کن.</p><div class="practice-grid"><div class="practice-card"><span class="eyebrow">1 / پرسش اصلی</span><p>در cat dog cat چند Token و چند Type داریم؟</p><details><summary>پاسخ را ببین</summary><p>سه Token و دو Type؛ هر رخداد یک توکن است.</p></details></div><div class="practice-card"><span class="eyebrow">2 / گرم‌کردن</span><p>آیا تبدیل Book به book نمونه‌ای از نرمال‌سازی است؟</p><details><summary>پاسخ را ببین</summary><p>بله؛ یکسان‌سازی بزرگی و کوچکی حروف نمونه‌ای از نرمال‌سازی است. البته باید نیاز کاربرد را هم در نظر گرفت.</p></details></div><div class="practice-card"><span class="eyebrow">3 / درست یا نادرست؟</span><p>خروجی Stemming همیشه یک واژهٔ معتبر در فرهنگ لغت است.</p><details><summary>پاسخ را ببین</summary><p>نادرست؛ ریشه‌یابی ممکن است یک صورت کوتاه‌شدهٔ غیرواژگانی بسازد. Lemmatization معمولاً به صورت پایهٔ واژگانی می‌رسد.</p></details></div><div class="practice-card"><span class="eyebrow">4 / حالا تو بگو</span><p>آیا حذف کلمات توقف در همهٔ جست‌وجوها مفید است؟</p><details><summary>پاسخ را ببین</summary><p>نه؛ در جست‌وجوی عبارتی یا عنوان‌ها، بعضی واژه‌های بسیار رایج هم برای تشخیص عبارت مهم‌اند.</p></details></div></div></section><label class="complete"><input type="checkbox" data-done="2"> این فصل را مطالعه کردم</label><div class="study-progress"><label for="lesson-study-meter">پیشرفت کل مطالعه: <span data-progress-label role="status" aria-live="polite">۰ از ۷ فصل</span></label><progress id="lesson-study-meter" data-study-meter max="7" value="0"></progress><small data-progress-note></small></div><nav class="chapter-nav"><a href="chapter-1.html">→ فصل قبل</a><a href="chapter-3.html">فصل بعد ←</a></nav></article></main><footer class="site-footer">بازیابی اطلاعات · بازنویسی آموزشی منابع ارسالی؛ مثال‌های افزوده برای یادگیری هستند.</footer></body></html>

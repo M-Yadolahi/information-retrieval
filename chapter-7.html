@@ -1,0 +1,62 @@
+<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>پرس‌وجوهای Wildcard، Permuterm Index و k-gram | دفتر مطالعه</title><link rel="stylesheet" href="site.css"><link rel="stylesheet" href="course.css"><script src="progress.js" defer></script></head><body><header class="site-header"><a class="brand" href="index.html">▤ دفتر مطالعه</a><nav><a href="index.html#lessons">فصل‌ها</a> · <a href="resources.html">منابع</a> · <a href="review.html">مرور</a></nav></header><main class="reading-layout"><aside class="toc"><span class="eyebrow">در این فصل</span><a href="#slide-1">انواع Wildcard</a><a href="#slide-2">Permuterm Index</a><a href="#slide-3">k-gram Index</a><a href="#slide-4">مقایسه عملی دو روش</a><a href="#slide-5">Wildcard از واژگان به اسناد</a><a href="#slide-6">مثال کامل Permuterm</a><a href="#slide-7">مثال k-gram و دلیل فیلتر نهایی</a></aside><article class="lesson"><span class="eyebrow">فصل 7 / درس‌نامهٔ بازنویسی‌شده</span><h1>پرس‌وجوهای Wildcard، Permuterm Index و k-gram</h1><p class="source-note">مبنای فصل: <a href="bin/1000025347.jpg">عکس جزوه؛ wildcard و k-gram ↗</a> و متن تایپ‌شدهٔ جزوه. توضیح‌ها و مثال‌های تکمیلی به متن افزوده شده‌اند؛ این صفحه رونویسی کلمه‌به‌کلمه نیست.</p><button class="print-button" onclick="window.print()">چاپ / ذخیره PDF</button><p>پرس‌وجوی wildcard با نمادهایی مانند <code>*</code> بخشی نامعلوم از واژه را نمایش می‌دهد. پیاده‌سازی این پرس‌وجوها به ساختاری نیاز دارد که واژه‌های کاندید را به‌سرعت پیدا کند.</p>
+<h3 id="slide-1">انواع Wildcard</h3>
+<table>
+<thead>
+<tr>
+<th>نوع</th>
+<th>نمونه</th>
+<th>روش متداول</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>انتهایی (Trailing)</td>
+<td><code>mon*</code></td>
+<td>یافتن بازه واژه‌هایی با پیشوند <code>mon</code> در B-Tree مرتب‌شده</td>
+</tr>
+<tr>
+<td>ابتدایی (Leading)</td>
+<td><code>*mon</code></td>
+<td>استفاده از واژه‌های معکوس و جست‌وجو در درخت B-Tree معکوس</td>
+</tr>
+<tr>
+<td>میانی (Middle)</td>
+<td><code>pro*or</code> یا <code>m*nchen</code></td>
+<td>تبدیل به جست‌وجوی ساختاریافته با Permuterm یا تولید نامزدها با k-gram و فیلتر نهایی</td>
+</tr>
+</tbody>
+</table>
+<h3 id="slide-2">Permuterm Index</h3>
+<p>در روش Permuterm، به انتهای هر واژه نشانه <code>$</code> افزوده می‌شود و سپس همه چرخش‌های دورانی آن در ایندکس ثبت می‌شوند. برای نمونه، از <code>hello$</code> چرخش‌هایی مانند موارد زیر ساخته می‌شود:</p>
+<ul>
+<li><code>hello$</code></li>
+<li><code>ello$h</code></li>
+<li><code>llo$he</code></li>
+<li><code>lo$hel</code></li>
+<li><code>o$hell</code></li>
+<li><code>$hello</code></li>
+</ul>
+<p>برای پاسخ به wildcard، رشته به شکلی چرخانده می‌شود که ستاره در انتهای الگو قرار گیرد. برای نمونه، الگوی <code>m*nchen</code> با در نظر گرفتن نشانه پایان به جست‌وجویی مانند <code>nchen$m*</code> تبدیل می‌شود. سپس بازه واژه‌هایی که با الگوی تبدیل‌شده سازگارند بازیابی می‌شود و نتیجه با الگوی اصلی تطبیق داده می‌شود.</p>
+<h3 id="slide-3">k-gram Index</h3>
+<p>در ایندکس k-gram، واژه‌ها با نشانه مرزی <code>$</code> تکمیل و به قطعات پیوسته با طول <code>k</code> شکسته می‌شوند. برای <code>k = 3</code>، واژه <code>$April$</code> به قطعات زیر تقسیم می‌شود:</p>
+<pre><code class="language-text">$Ap, Apr, pri, ril, il$
+</code></pre>
+<p>برای یک wildcard، ابتدا k-gramهای قطعات ثابت الگو استخراج می‌شوند؛ سپس با اشتراک‌گیری از فهرست واژه‌های دارای آن قطعات، مجموعه‌ای از نامزدها به دست می‌آید. در پایان، هر نامزد با خود الگوی wildcard تطبیق داده می‌شود تا موارد نادرست حذف شوند.</p>
+<h3 id="slide-4">مقایسه عملی دو روش</h3>
+<ul>
+<li><strong>Permuterm:</strong> پرس‌وجوهای wildcard را با تبدیل دورانی به جست‌وجوی پیشوندی تبدیل می‌کند، اما به‌دلیل ذخیره چرخش‌های متعدد، فضای ایندکس بیشتری مصرف می‌کند.</li>
+<li><strong>k-gram:</strong> معمولاً فضای ذخیره‌سازی را بهتر کنترل می‌کند و برای تولید نامزدها مناسب است، اما نیازمند مرحله فیلتر نهایی است؛ اشتراک k-gramها به‌تنهایی تضمین نمی‌کند واژه دقیقاً با wildcard منطبق باشد.</li>
+</ul>
+<h3 id="slide-5">Wildcard از واژگان به اسناد</h3>
+<p>ایندکس کمکی wildcard معمولاً ابتدا <strong>واژه‌های واژگان</strong> را برمی‌گرداند، نه DocIDها. پس از فیلتر نامزدها، postings واژه‌های پذیرفته‌شده با OR ترکیب می‌شوند تا اسناد حاصل شوند. در این درس * به معنی صفر یا چند نویسه است.</p>
+<h3 id="slide-6">مثال کامل Permuterm</h3>
+<pre><code class="language-text">word: hello → hello$
+query: he*o → he*o$ → o$he*
+prefix to look up: o$he
+matching rotation: o$hell → original word: hello
+</code></pre>
+<p>برای واژه‌ای با طول L، تعداد چرخش‌ها L+1 است. ذخیرهٔ سادهٔ رشتهٔ کامل هر چرخش هزینهٔ قابل‌توجه دارد. تبدیل تک‌ستاره به یک پیشوند مستقیم است؛ چند ستاره به پردازش اضافی و تطبیق نهایی نیاز دارد.</p>
+<h3 id="slide-7">مثال k-gram و دلیل فیلتر نهایی</h3>
+<p>برای الگوی <code>re*ve</code> و bigram، شرط‌های ضروری شامل <code>$r</code>، <code>re</code>، <code>ve</code> و <code>e$</code> هستند. واژهٔ <code>receive</code> این شرط‌ها را دارد و با الگو سازگار است. واژهٔ <code>reverse</code> نیز این قطعات را دارد، اما به ve ختم نمی‌شود؛ پس باید در مرحلهٔ تطبیق با الگوی اصلی حذف شود.</p>
+<p>برای قطعه‌ای کوتاه‌تر از k ممکن است هیچ k-gram قابل‌استفاده‌ای تولید نشود. کاهش k نامزدها را بیشتر می‌کند؛ افزایش k برخی قطعات کوتاه را بی‌استفاده می‌کند. قطعاتی که از روی * عبور می‌کنند نباید به‌عنوان زیررشتهٔ قطعی استخراج شوند.</p>
+<section class="self-test"><h2>خودت را بسنج · ۴ پرسش کوتاه</h2><p>بدون عجله جواب بده؛ هر پاسخ را جدا باز کن و با جواب خودت مقایسه کن.</p><div class="practice-grid"><div class="practice-card"><span class="eyebrow">1 / پرسش اصلی</span><p>چرا بعد از اشتراک k-gramها فیلتر لازم است؟</p><details><summary>پاسخ را ببین</summary><p>وجود قطعات، ترتیب و محل درست آن‌ها نسبت به مرز و ستاره را تضمین نمی‌کند.</p></details></div><div class="practice-card"><span class="eyebrow">2 / گرم‌کردن</span><p>کدام واژه با الگوی ca* سازگار است: cat یا dog؟</p><details><summary>پاسخ را ببین</summary><p>cat؛ الگو با ca شروع می‌شود و * می‌تواند صفر یا چند نویسه را پوشش دهد.</p></details></div><div class="practice-card"><span class="eyebrow">3 / یک مرحلهٔ کوتاه</span><p>در Permuterm، با نشانگر پایان $، الگوی ca* را برای جست‌وجوی پیشوند به چه شکلی می‌چرخانیم؟</p><details><summary>پاسخ را ببین</summary><p>ca*$ را می‌چرخانیم تا ستاره آخر باشد: $ca*. سپس چرخش‌های دارای پیشوند $ca را جست‌وجو می‌کنیم.</p></details></div><div class="practice-card"><span class="eyebrow">4 / حالا تو بگو</span><p>آیا ca هم با ca* تطبیق دارد؟</p><details><summary>پاسخ را ببین</summary><p>بله؛ در این نوع Wildcard، ستاره می‌تواند رشتهٔ خالی را هم نمایندگی کند.</p></details></div></div></section><label class="complete"><input type="checkbox" data-done="7"> این فصل را مطالعه کردم</label><div class="study-progress"><label for="lesson-study-meter">پیشرفت کل مطالعه: <span data-progress-label role="status" aria-live="polite">۰ از ۷ فصل</span></label><progress id="lesson-study-meter" data-study-meter max="7" value="0"></progress><small data-progress-note></small></div><nav class="chapter-nav"><a href="chapter-6.html">→ فصل قبل</a><a href="review.html">مرور نهایی ←</a></nav></article></main><footer class="site-footer">بازیابی اطلاعات · بازنویسی آموزشی منابع ارسالی؛ مثال‌های افزوده برای یادگیری هستند.</footer></body></html>
