@@ -1,0 +1,405 @@
+<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>واژه‌نامه‌ها و بازیابی با تطبیق غیردقیق | دفتر مطالعه</title><link rel="stylesheet" href="site.css"><link rel="stylesheet" href="course.css"><link rel="stylesheet" href="supplements/ch8/lesson.css"><script defer src="progress.js"></script><script defer src="supplements/ch8/lab.js"></script></head><body><header class="site-header"><a class="brand" href="index.html">▤ دفتر مطالعه</a><nav><a href="index.html#lessons">فصل‌ها</a> · <a href="resources.html">منابع</a> · <a href="review.html">مرور</a></nav></header><main class="reading-layout"><aside class="toc"><span class="eyebrow">در این فصل</span><a href="#foundations">از رخداد واژه تا مکان آن در سند</a><a href="#dictionary">واژه‌نامه چه چیزی را نگه می‌دارد؟</a><a href="#wildcards">Wildcard: اول واژه، بعد سند</a><a href="#edit-distance">فاصلهٔ ویرایشی: هزینهٔ تبدیل دو پیشوند</a><a href="#distance-lab">کارگاه ماتریس: OSLO → SNOW</a><a href="#spelling">پیشنهاد املا: نامزد، رتبه و بافت</a><a href="#soundex">Soundex: شباهت آوایی با ورودی لاتین</a></aside><article class="lesson tolerant"><span class="eyebrow">فصل ۸ سایت · درس ۳ منبع</span><h1>واژه‌نامه‌ها و بازیابی با تطبیق غیردقیق</h1><p class="source-note">منبع: درس Dictionaries and tolerant retrieval از Hinrich Schütze و Christina Lioma. متن و شکل‌های اصلی هر بخش زیر همان بخش باز می‌شوند.</p><p>اگر کاربر mon* یا informaton را بنویسد، موتور جست‌وجو چطور از این ورودی به واژه و از واژه به سند می‌رسد؟</p><button class="print-button" onclick="window.print()">چاپ / ذخیره PDF</button><section id="foundations"><h2 id="slide-1">از رخداد واژه تا مکان آن در سند</h2><p>در جملهٔ زیر روی یک واژه بزن تا رخدادهای هم‌نوعش را ببینی. پس از یکسان‌سازی حروف بزرگ و کوچک، ۱۲ رخداد ولی فقط ۹ صورت متمایز داریم. فاصله همیشه مرز واژه نیست: در چینی فاصله الزامی نیست و در آلمانی چند جزء می‌توانند یک کلمه بسازند. دو تاریخ <code>3/20/91</code> و <code>20/3/91</code> نیز با وجود ظاهر متفاوت ممکن است یک روز را نشان دهند.</p>
+<p>در نمایهٔ معکوس ساده، هر مدخل به شناسه‌های سند می‌رسد؛ اشاره‌گر پرش اجازه می‌دهد هنگام اشتراک، بخشی از یک فهرست مرتب را بدون از دست دادن پاسخ رد کنیم. در نمایهٔ مکانی، محل هر رخداد را هم داریم. در سند ۴ اسلاید ۸، <code>TO</code> در مکان ۱۶ و <code>BE</code> در ۱۷ آمده است. این برای <code>to be</code> کافی است، نه برای <code>to be or not to be</code>: همهٔ شش موقعیت باید با ترتیب و فاصلهٔ دقیق سازگار باشند. در پرس‌وجوی مجاورت، به‌جای این زنجیرهٔ دقیق، یک بازهٔ فاصله مجاز است.</p>
+<div id="tokens"></div><details><summary>متن و شکل‌های منبع · اسلایدهای 1 تا 10</summary><details id="source-1"><summary>اسلاید 1</summary><pre><code class="language-text">Hinrich Schütze and Christina Lioma
+Lecture 3: Dictionaries and tolerant retrieval
+</code></pre></details><details id="source-2"><summary>اسلاید 2</summary><pre><code class="language-text">Overview
+Recap 
+ Dictionaries
+ Wildcard queries
+ Edit distance
+Spelling correction
+Soundex
+</code></pre></details><details id="source-3"><summary>اسلاید 3</summary><pre><code class="language-text">Outline
+Recap 
+ Dictionaries
+ Wildcard queries
+ Edit distance
+Spelling correction
+Soundex
+</code></pre></details><details id="source-4"><summary>اسلاید 4</summary><pre><code class="language-text">Type/token distinction
+Token – an instance of a word or term occurring in a document
+Type – an equivalence class of tokens
+In June, the dog likes to chase the cat in the barn.
+12 word tokens, 9 word types
+</code></pre></details><details id="source-5"><summary>اسلاید 5</summary><pre><code class="language-text">Problems in tokenization
+What are the delimiters? Space? Apostrophe? Hyphen?
+For each of these: sometimes they delimit, sometimes they don’t.
+No whitespace in many languages! (e.g., Chinese)
+No whitespace in Dutch, German, Swedish compounds (Lebensversicherungsgesellschaftsangestellter)
+</code></pre></details><details id="source-6"><summary>اسلاید 6</summary><pre><code class="language-text">Problems with equivalence classing
+A term is an equivalence class of tokens.
+How do we define equivalence classes?
+Numbers (3/20/91 vs. 20/3/91)
+Case folding
+Stemming, Porter stemmer
+Morphological analysis: inflectional vs. derivational
+Equivalence classing problems in other languages
+More complex morphology than in English
+Finnish: a single verb may have 12,000 different forms
+Accents, umlauts
+</code></pre></details><details id="source-7"><summary>اسلاید 7</summary><pre><code class="language-text">Skip pointers
+</code></pre><p><img alt="Skip pointers — اسلاید 7" loading="lazy" src="supplements/ch8/assets/slide-007-1.png"/></p></details><details id="source-8"><summary>اسلاید 8</summary><pre><code class="language-text">Positional indexes
+Postings lists in a nonpositional index: each posting is just a docID
+Postings lists in a positional index: each posting is a docID and a list of positions
+Example query: “to1 be2 or3 not4 to5 be6” 
+TO, 993427:
+‹ 1: ‹7, 18, 33, 72, 86, 231›;
+  2: ‹1, 17, 74, 222, 255›;
+  4: ‹8, 16, 190, 429, 433›;
+  5: ‹363, 367›;
+  7: ‹13, 23, 191›; . . . ›
+BE, 178239:
+‹ 1: ‹17, 25›;
+  4: ‹17, 191, 291, 430, 434›;
+  5: ‹14, 19, 101›; . . . › Document 4 is a match!
+</code></pre></details><details id="source-9"><summary>اسلاید 9</summary><pre><code class="language-text">Positional indexes
+With a positional index, we can answer phrase queries.
+With a positional index, we can answer proximity queries.
+</code></pre></details><details id="source-10"><summary>اسلاید 10</summary><pre><code class="language-text">Take-away
+Tolerant retrieval: What to do if there is no exact match between query term and document term
+Wildcard queries
+Spelling correction
+</code></pre></details></details></section><section id="dictionary"><h2 id="slide-2">واژه‌نامه چه چیزی را نگه می‌دارد؟</h2><p>واژگان مجموعهٔ ترم‌هاست؛ واژه‌نامه ساختاری است که آن‌ها را قابل جست‌وجو می‌کند. سطر نمونهٔ اسلاید ۱۶ شامل واژه (۲۰ بایت)، تعداد سندهای حاوی آن (۴ بایت) و اشاره‌گر به فهرست سندها (۴ بایت) است. اگر واژه در یک سند ده بار بیاید، آن سند فقط یک واحد به بسامد سندی می‌افزاید.</p>
+<p>برای پیدا کردن کلید دقیق، جدول هش معمولاً زمان ثابتِ مورد انتظار دارد، نه تضمین بدترین حالت؛ برخوردها باید حل شوند. برای پیدا کردن تمام ترم‌هایی که با <code>automat</code> آغاز می‌شوند، هش معمولی کلیدها را به ترتیب مناسب نمی‌چیند. در درخت دودویی متوازن می‌توان در زمان <code>O(log M)</code> به شروع بازه رسید و سپس اعضای بازه را خواند. B-tree چند شاخه در هر گره دارد و هنگام دسترسی صفحه‌ای به حافظهٔ جانبی می‌تواند تعداد خواندن‌ها را کم کند. رشد واژگان و هزینهٔ نگه‌داشتن توازن در انتخاب ساختار مهم‌اند.</p>
+<details><summary>متن و شکل‌های منبع · اسلایدهای 11 تا 21</summary><details id="source-11"><summary>اسلاید 11</summary><pre><code class="language-text">Outline
+Recap 
+ Dictionaries
+ Wildcard queries
+ Edit distance
+Spelling correction
+Soundex
+</code></pre></details><details id="source-12"><summary>اسلاید 12</summary><pre><code class="language-text">Inverted index
+</code></pre><p><img alt="Inverted index — اسلاید 12" loading="lazy" src="supplements/ch8/assets/slide-012-1.png"/></p></details><details id="source-13"><summary>اسلاید 13</summary><pre><code class="language-text">Inverted index
+</code></pre><p><img alt="Inverted index — اسلاید 13" loading="lazy" src="supplements/ch8/assets/slide-013-1.png"/></p></details><details id="source-14"><summary>اسلاید 14</summary><pre><code class="language-text">Dictionaries
+The dictionary is the data structure for storing the term vocabulary.
+Term vocabulary: the data
+Dictionary: the data structure for storing the term vocabulary
+</code></pre></details><details id="source-15"><summary>اسلاید 15</summary><pre><code class="language-text">Dictionary as array of fixed-width entries
+For each term, we need to store a couple of items:
+document frequency
+pointer to postings list
+. . .
+Assume for the time being that we can store this information in a fixed-length entry.
+Assume that we store these entries in an array.
+</code></pre></details><details id="source-16"><summary>اسلاید 16</summary><pre><code class="language-text">Dictionary as array of fixed-width entries
+space needed:   20 bytes   4 bytes            4 bytes
+How do we look up a query term qi in this array at query time? That is: which data structure do we use to locate the entry (row) in the array where qi is stored?
+</code></pre><p><img alt="Dictionary as array of fixed-width entries — اسلاید 16" loading="lazy" src="supplements/ch8/assets/slide-016-1.png"/></p></details><details id="source-17"><summary>اسلاید 17</summary><pre><code class="language-text">Data structures for looking up term
+Two main classes of data structures: hashes and trees
+Some IR systems use hashes, some use trees.
+Criteria for when to use hashes vs. trees:
+Is there a fixed number of terms or will it keep growing?
+What are the relative frequencies with which various keys will be accessed?
+How many terms are we likely to have?
+</code></pre></details><details id="source-18"><summary>اسلاید 18</summary><pre><code class="language-text">Hashes
+Each vocabulary term is hashed into an integer.
+Try to avoid collisions
+At query time, do the following: hash query term, resolve collisions, locate entry in fixed-width array
+Pros: Lookup in a hash is faster than lookup in a tree.
+Lookup time is constant.
+Cons
+no way to find minor variants (resume vs. résumé)
+no prefix search (all terms starting with automat)
+need to rehash everything periodically if vocabulary keeps growing
+</code></pre></details><details id="source-19"><summary>اسلاید 19</summary><pre><code class="language-text">Trees
+Trees solve the prefix problem (find all terms starting with automat).
+Simplest tree: binary tree
+Search is slightly slower than in hashes: O(logM), where M is the size of the vocabulary.
+O(logM) only holds for balanced trees.
+Rebalancing binary trees is expensive.
+B-trees mitigate the rebalancing problem.
+B-tree definition: every internal node has a number of children in the interval [a, b] where a, b are appropriate positive integers, e.g., [2, 4].
+</code></pre></details><details id="source-20"><summary>اسلاید 20</summary><pre><code class="language-text">Binary tree
+</code></pre><p><img alt="Binary tree — اسلاید 20" loading="lazy" src="supplements/ch8/assets/slide-020-1.png"/></p></details><details id="source-21"><summary>اسلاید 21</summary><pre><code class="language-text">B-tree
+</code></pre><p><img alt="B-tree — اسلاید 21" loading="lazy" src="supplements/ch8/assets/slide-021-1.png"/></p></details></details></section><section id="wildcards"><h2 id="slide-3">Wildcard: اول واژه، بعد سند</h2><p>برای <code>mon*</code> در واژه‌نامهٔ مرتب، بازهٔ <code>mon ≤ t &lt; moo</code> را می‌خوانیم. برای <code>*mon</code> در واژه‌نامهٔ وارونه به دنبال <code>nom ≤ t &lt; non</code> می‌گردیم. برای <code>m*nchen</code> واژه‌های دارای پیشوند و پسوند مطلوب را <strong>اشتراک</strong> می‌گیریم؛ سپس فهرست اسناد واژه‌های پذیرفته‌شده را <strong>اجتماع</strong> می‌گیریم.</p>
+<p>در permuterm مرز <code>$</code> را به واژه اضافه می‌کنیم. چرخش‌های <code>hello$</code>، از جمله <code>$hello</code>، همه به <code>hello</code> اشاره دارند. برای <code>hel*o</code> ستاره را با چرخش به آخر می‌بریم: <code>o$hel*</code>. برای <code>X*</code> نیز پیشوند درست <code>$X</code> است. هزینهٔ این آسودگی، ذخیرهٔ چرخش‌های متعدد است.</p>
+<p>در ایندکس bigram، <code>$m</code>، <code>mo</code> و <code>on</code> به <strong>واژه‌ها</strong> اشاره دارند. اشتراکشان برای <code>mon*</code> واژهٔ <code>moon</code> را هم می‌دهد؛ آزمون نهایی آن را حذف می‌کند. در <code>[gen* universit*]</code>، درون هر گروه سندها را با OR ترکیب می‌کنیم و میان دو گروه AND می‌گیریم؛ گسترش‌های بزرگ پرهزینه‌اند. تمرین گوگل در مرجع، مثال تاریخی سال ۲۰۱۰ است.</p>
+<details><summary>متن و شکل‌های منبع · اسلایدهای 22 تا 34</summary><details id="source-22"><summary>اسلاید 22</summary><pre><code class="language-text">Outline
+Recap 
+ Dictionaries
+ Wildcard queries
+ Edit distance
+Spelling correction
+Soundex
+</code></pre></details><details id="source-23"><summary>اسلاید 23</summary><pre><code class="language-text">Wildcard queries
+mon*: find all docs containing any term beginning with mon
+Easy with B-tree dictionary: retrieve all terms t in the range: mon ≤ t &lt; moo
+*mon: find all docs containing any term ending with mon
+Maintain an additional tree for terms backwards
+Then retrieve all terms t in the range: nom ≤ t &lt; non
+Result: A set of terms that are matches for wildcard query
+Then retrieve documents that contain any of these terms
+</code></pre></details><details id="source-24"><summary>اسلاید 24</summary><pre><code class="language-text">How to handle * in the middle of a term
+Example: m*nchen
+We could look up m* and *nchen in the B-tree and intersect the two term sets.
+Expensive
+Alternative: permuterm index
+Basic idea: Rotate every wildcard query, so that the * occurs at the end.
+Store each of these rotations in the dictionary, say, in a B-tree
+</code></pre></details><details id="source-25"><summary>اسلاید 25</summary><pre><code class="language-text">Permuterm index
+For term HELLO: add hello$, ello$h, llo$he, lo$hel, and o$hell to the B-tree where $ is a special symbol
+</code></pre></details><details id="source-26"><summary>اسلاید 26</summary><pre><code class="language-text">Permuterm → term mapping
+</code></pre><p><img alt="Permuterm → term mapping — اسلاید 26" loading="lazy" src="supplements/ch8/assets/slide-026-1.png"/></p></details><details id="source-27"><summary>اسلاید 27</summary><pre><code class="language-text">Permuterm index
+For HELLO, we’ve stored: hello$, ello$h, llo$he, lo$hel, and o$hell
+Queries
+For X, look up X$
+For X*, look up X*$
+For *X, look up X$*
+For *X*, look up X*
+For X*Y, look up Y$X*
+Example: For hel*o, look up o$hel*
+Permuterm index would better be called a permuterm tree.
+But permuterm index is the more common name.
+</code></pre></details><details id="source-28"><summary>اسلاید 28</summary><pre><code class="language-text">Processing a lookup in the permuterm index
+Rotate query wildcard to the right
+Use B-tree lookup as before
+Problem: Permuterm more than quadruples the size of the dictionary compared to a regular B-tree. (empirical number)
+</code></pre></details><details id="source-29"><summary>اسلاید 29</summary><pre><code class="language-text">k-gram indexes
+More space-efficient than permuterm index
+Enumerate all character k-grams (sequence of k characters) occurring in a term
+2-grams are called bigrams.
+Example: from April is the cruelest month we get the bigrams: $a ap pr ri il l$ $i is s$ $t th he e$ $c cr ru ue el le es st t$ $m mo on nt h$
+$ is a special word boundary symbol, as before.
+Maintain an inverted index from bigrams to the terms that contain the bigram
+</code></pre></details><details id="source-30"><summary>اسلاید 30</summary><pre><code class="language-text">Postings list in a 3-gram inverted index
+</code></pre><p><img alt="Postings list in a 3-gram inverted index — اسلاید 30" loading="lazy" src="supplements/ch8/assets/slide-030-1.png"/></p></details><details id="source-31"><summary>اسلاید 31</summary><pre><code class="language-text">k-gram (bigram, trigram, . . . ) indexes
+Note that we now have two different types of inverted indexes
+The term-document inverted index for finding documents based on a query consisting of terms
+The k-gram index for finding terms based on a query consisting of k-grams
+</code></pre></details><details id="source-32"><summary>اسلاید 32</summary><pre><code class="language-text">Processing wildcarded terms in a bigram index
+Query mon* can now be run as: $m AND mo AND on
+Gets us all terms with the prefix mon . . .
+. . . but also many “false positives” like MOON.
+We must postfilter these terms against query.
+Surviving terms are then looked up in the term-document inverted index.
+k-gram index vs. permuterm index
+k-gram index is more space efficient.
+Permuterm index doesn’t require postfiltering.
+</code></pre></details><details id="source-33"><summary>اسلاید 33</summary><pre><code class="language-text">Exercise
+Google has very limited support for wildcard queries.
+For example, this query doesn’t work very well on Google: [gen* universit*]
+Intention: you are looking for the University of Geneva, but don’t know which accents to use for the French words for university and Geneva.
+According to Google search basics, 2010-04-29: “Note that the * operator works only on whole words, not parts of words.”
+But this is not entirely true. Try [pythag*] and [m*nchen]
+Exercise: Why doesn’t Google fully support wildcard queries?
+</code></pre></details><details id="source-34"><summary>اسلاید 34</summary><pre><code class="language-text">Processing wildcard queries in the term-document index
+Problem 1: we must potentially execute a large number of Boolean queries.
+Most straightforward semantics: Conjunction of disjunctions
+For [gen* universit*]: geneva university OR geneva université OR genève university OR genève université OR general universities OR . . .
+Very expensive
+Problem 2: Users hate to type.
+If abbreviated queries like [pyth* theo*] for [pythagoras’ theorem] are allowed, users will use them a lot.
+This would significantly increase the cost of answering queries.
+Somewhat alleviated by Google Suggest
+</code></pre></details></details></section><section id="edit-distance"><h2 id="slide-4">فاصلهٔ ویرایشی: هزینهٔ تبدیل دو پیشوند</h2><p>در تصحیح OCR خود سند تغییر می‌کند؛ در تصحیح پرس‌وجو می‌توان پیشنهاد داد و متن سند را دست نزد. برای <code>informaton → information</code> یک درج کافی است. اما <code>form</code> خودش واژه‌ای معتبر است؛ تشخیص <code>from</code> در مثال سیارک به بافت نیاز دارد. واژگان پیکره ممکن است حاوی غلط باشد؛ واژه‌نامهٔ تخصصی یا وزن‌دار می‌تواند انتخاب بهتری باشد.</p>
+<p>در فاصلهٔ Levenshtein حذف، درج یا جایگزینی یک واحد هزینه دارد؛ کپی رایگان است. در Damerau–Levenshtein جابه‌جایی دو حرف مجاور هم یک عمل است: <code>cat → act</code> در اولی ۲ و در دومی ۱ هزینه دارد. مقدار هر خانه فاصلهٔ <strong>دو پیشوند</strong> است. در مثال <code>cats → fast</code> سطرها پیشوندهای مبدأ و ستون‌ها پیشوندهای مقصدند.</p>
+<pre><code class="language-text">D[i,0] = i; D[0,j] = j
+D[i,j] = min(D[i-1,j]+1, D[i,j-1]+1,
+             D[i-1,j-1]+(source[i-1] != target[j-1]))
+</code></pre>
+<p>اگر هزینه‌ها وزن‌دار باشند، می‌توان اشتباه <code>m → n</code> را ارزان‌تر از <code>m → q</code> گرفت. سطر و ستون نخست نیز باید مجموع هزینه‌های واقعی درج یا حذف را نشان دهند.</p>
+<details><summary>متن و شکل‌های منبع · اسلایدهای 35 تا 54</summary><details id="source-35"><summary>اسلاید 35</summary><pre><code class="language-text">Outline
+Recap 
+ Dictionaries
+ Wildcard queries
+ Edit distance
+Spelling correction
+Soundex
+</code></pre></details><details id="source-36"><summary>اسلاید 36</summary><pre><code class="language-text">Spelling correction
+Two principal uses
+Correcting documents being indexed
+Correcting user queries
+Two different methods for spelling correction
+Isolated word spelling correction
+Check each word on its own for misspelling
+Will not catch typos resulting in correctly spelled words, e.g., an asteroid that fell form the sky
+Context-sensitive spelling correction
+Look at surrounding words
+Can correct form/from error above
+</code></pre></details><details id="source-37"><summary>اسلاید 37</summary><pre><code class="language-text">Correcting documents
+We’re not interested in interactive spelling correction of documents (e.g., MS Word) in this class.
+In IR, we use document correction primarily for OCR’ed documents. (OCR = optical character recognition)
+The general philosophy in IR is: don’t change the documents.
+</code></pre></details><details id="source-38"><summary>اسلاید 38</summary><pre><code class="language-text">Correcting queries
+First: isolated word spelling correction
+Premise 1: There is a list of “correct words” from which the correct spellings come.
+Premise 2: We have a way of computing the distance between a misspelled word and a correct word.
+Simple spelling correction algorithm: return the “correct” word that has the smallest distance to the misspelled word.
+Example: informaton → information
+For the list of correct words, we can use the vocabulary of all words that occur in our collection.
+Why is this problematic?
+</code></pre></details><details id="source-39"><summary>اسلاید 39</summary><pre><code class="language-text">Alternatives to using the term vocabulary
+A standard dictionary (Webster’s, OED etc.)
+An industry-specific dictionary (for specialized IR systems)
+The term vocabulary of the collection, appropriately weighted
+</code></pre></details><details id="source-40"><summary>اسلاید 40</summary><pre><code class="language-text">Distance between misspelled word and “correct” word
+We will study several alternatives.
+Edit distance and Levenshtein distance
+Weighted edit distance
+k-gram overlap
+</code></pre></details><details id="source-41"><summary>اسلاید 41</summary><pre><code class="language-text">Edit distance
+The edit distance between string s1 and string s2 is the minimum number of basic operations that convert s1 to s2.
+Levenshtein distance: The admissible basic operations are insert, delete, and replace
+Levenshtein distance dog-do: 1
+Levenshtein distance cat-cart: 1
+Levenshtein distance cat-cut: 1
+Levenshtein distance cat-act: 2
+Damerau-Levenshtein distance cat-act: 1
+Damerau-Levenshtein includes transposition as a fourth possible operation.
+</code></pre></details><details id="source-42"><summary>اسلاید 42</summary><pre><code class="language-text">Levenshtein distance: Computation
+</code></pre><p><img alt="Levenshtein distance: Computation — اسلاید 42" loading="lazy" src="supplements/ch8/assets/slide-042-1.png"/></p></details><details id="source-43"><summary>اسلاید 43</summary><pre><code class="language-text">Levenshtein distance: Algorithm
+</code></pre><p><img alt="Levenshtein distance: Algorithm — اسلاید 43" loading="lazy" src="supplements/ch8/assets/slide-043-1.png"/></p></details><details id="source-44"><summary>اسلاید 44</summary><pre><code class="language-text">Levenshtein distance: Algorithm
+</code></pre><p><img alt="Levenshtein distance: Algorithm — اسلاید 44" loading="lazy" src="supplements/ch8/assets/slide-044-1.png"/></p></details><details id="source-45"><summary>اسلاید 45</summary><pre><code class="language-text">Levenshtein distance: Algorithm
+</code></pre><p><img alt="Levenshtein distance: Algorithm — اسلاید 45" loading="lazy" src="supplements/ch8/assets/slide-045-1.png"/></p></details><details id="source-46"><summary>اسلاید 46</summary><pre><code class="language-text">Levenshtein distance: Algorithm
+</code></pre><p><img alt="Levenshtein distance: Algorithm — اسلاید 46" loading="lazy" src="supplements/ch8/assets/slide-046-1.png"/></p></details><details id="source-47"><summary>اسلاید 47</summary><pre><code class="language-text">Levenshtein distance: Algorithm
+</code></pre><p><img alt="Levenshtein distance: Algorithm — اسلاید 47" loading="lazy" src="supplements/ch8/assets/slide-047-1.png"/></p></details><details id="source-48"><summary>اسلاید 48</summary><pre><code class="language-text">Levenshtein distance: Example
+</code></pre><p><img alt="Levenshtein distance: Example — اسلاید 48" loading="lazy" src="supplements/ch8/assets/slide-048-1.png"/></p></details><details id="source-49"><summary>اسلاید 49</summary><pre><code class="language-text">Each cell of Levenshtein matrix
+cost of getting here from
+my upper left neighbor
+(copy or replace) | cost of getting here
+from my upper neighbor
+(delete)
+cost of getting here from
+my left neighbor (insert) | the minimum of the three possible “movements”;
+the cheapest way of getting here
+</code></pre></details><details id="source-50"><summary>اسلاید 50</summary><pre><code class="language-text">Levenshtein distance: Example
+</code></pre><p><img alt="Levenshtein distance: Example — اسلاید 50" loading="lazy" src="supplements/ch8/assets/slide-050-1.png"/></p></details><details id="source-51"><summary>اسلاید 51</summary><pre><code class="language-text">Dynamic programming (Cormen et al.)
+Optimal substructure: The optimal solution to the problem contains within it subsolutions, i.e., optimal solutions to subproblems.
+Overlapping subsolutions: The subsolutions overlap. These subsolutions are computed over and over again when computing the global optimal solution in a brute-force algorithm.
+Subproblem in the case of edit distance: what is the edit distance of two prefixes
+Overlapping subsolutions: We need most distances of prefixes 3 times – this corresponds to moving right, diagonally, down.
+</code></pre></details><details id="source-52"><summary>اسلاید 52</summary><pre><code class="language-text">Weighted edit distance
+As above, but weight of an operation depends on the characters involved.
+Meant to capture keyboard errors, e.g., m more likely to be mistyped as n than as q.
+Therefore, replacing m by n is a smaller edit distance than by q.
+We now require a weight matrix as input.
+Modify dynamic programming to handle weights
+</code></pre></details><details id="source-53"><summary>اسلاید 53</summary><pre><code class="language-text">Using edit distance for spelling correction
+Given query, first enumerate all character sequences within a preset (possibly weighted) edit distance
+Intersect this set with our list of “correct” words
+Then suggest terms in the intersection to the user.
+→ exercise in a few slides
+</code></pre></details><details id="source-54"><summary>اسلاید 54</summary><pre><code class="language-text">Exercise
+Compute Levenshtein distance matrix for OSLO – SNOW
+What are the Levenshtein editing operations that transform cat into catcat?
+</code></pre></details></details></section><section id="distance-lab"><h2 id="slide-5">کارگاه ماتریس: OSLO → SNOW</h2><p>از مرزها شروع کن: تبدیل رشتهٔ تهی به سه حرف، سه درج می‌خواهد. در هر گام، یک خانه را از همسایهٔ بالا (حذف)، چپ (درج) و قطر (کپی یا جایگزینی) به دست می‌آوریم. عدد پایین‌راست فاصله است؛ برای یافتن عملیات باید یک مسیر کم‌هزینه را از آن خانه به عقب دنبال کرد.</p>
+<p>یک مسیر به ترتیب اجرا: حذف O نخست، کپی S، جایگزینی L با N، کپی O، درج W. بنابراین <code>OSLO → SLO → SNO → SNOW</code> سه ویرایش دارد. در <code>cat → catcat</code> نیز هزینهٔ بهینه سه است، ولی هم‌ترازی یکتا نیست:</p>
+<pre><code class="language-text">target  catcat
+        ---cat
+        c---at
+        ca---t
+        cat---
+</code></pre>
+<div id="matrix-lab"></div><details><summary>متن و شکل‌های منبع · اسلایدهای 55 تا 99</summary><details id="source-55"><summary>اسلاید 55</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 55" loading="lazy" src="supplements/ch8/assets/slide-055-1.png"/></p></details><details id="source-56"><summary>اسلاید 56</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 56" loading="lazy" src="supplements/ch8/assets/slide-056-1.png"/></p></details><details id="source-57"><summary>اسلاید 57</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 57" loading="lazy" src="supplements/ch8/assets/slide-057-1.png"/></p></details><details id="source-58"><summary>اسلاید 58</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 58" loading="lazy" src="supplements/ch8/assets/slide-058-1.png"/></p></details><details id="source-59"><summary>اسلاید 59</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 59" loading="lazy" src="supplements/ch8/assets/slide-059-1.png"/></p></details><details id="source-60"><summary>اسلاید 60</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 60" loading="lazy" src="supplements/ch8/assets/slide-060-1.png"/></p></details><details id="source-61"><summary>اسلاید 61</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 61" loading="lazy" src="supplements/ch8/assets/slide-061-1.png"/></p></details><details id="source-62"><summary>اسلاید 62</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 62" loading="lazy" src="supplements/ch8/assets/slide-062-1.png"/></p></details><details id="source-63"><summary>اسلاید 63</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 63" loading="lazy" src="supplements/ch8/assets/slide-063-1.png"/></p></details><details id="source-64"><summary>اسلاید 64</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 64" loading="lazy" src="supplements/ch8/assets/slide-064-1.png"/></p></details><details id="source-65"><summary>اسلاید 65</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 65" loading="lazy" src="supplements/ch8/assets/slide-065-1.png"/></p></details><details id="source-66"><summary>اسلاید 66</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 66" loading="lazy" src="supplements/ch8/assets/slide-066-1.png"/></p></details><details id="source-67"><summary>اسلاید 67</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 67" loading="lazy" src="supplements/ch8/assets/slide-067-1.png"/></p></details><details id="source-68"><summary>اسلاید 68</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 68" loading="lazy" src="supplements/ch8/assets/slide-068-1.png"/></p></details><details id="source-69"><summary>اسلاید 69</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 69" loading="lazy" src="supplements/ch8/assets/slide-069-1.png"/></p></details><details id="source-70"><summary>اسلاید 70</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 70" loading="lazy" src="supplements/ch8/assets/slide-070-1.png"/></p></details><details id="source-71"><summary>اسلاید 71</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 71" loading="lazy" src="supplements/ch8/assets/slide-071-1.png"/></p></details><details id="source-72"><summary>اسلاید 72</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 72" loading="lazy" src="supplements/ch8/assets/slide-072-1.png"/></p></details><details id="source-73"><summary>اسلاید 73</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 73" loading="lazy" src="supplements/ch8/assets/slide-073-1.png"/></p></details><details id="source-74"><summary>اسلاید 74</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 74" loading="lazy" src="supplements/ch8/assets/slide-074-1.png"/></p></details><details id="source-75"><summary>اسلاید 75</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 75" loading="lazy" src="supplements/ch8/assets/slide-075-1.png"/></p></details><details id="source-76"><summary>اسلاید 76</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 76" loading="lazy" src="supplements/ch8/assets/slide-076-1.png"/></p></details><details id="source-77"><summary>اسلاید 77</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 77" loading="lazy" src="supplements/ch8/assets/slide-077-1.png"/></p></details><details id="source-78"><summary>اسلاید 78</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 78" loading="lazy" src="supplements/ch8/assets/slide-078-1.png"/></p></details><details id="source-79"><summary>اسلاید 79</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 79" loading="lazy" src="supplements/ch8/assets/slide-079-1.png"/></p></details><details id="source-80"><summary>اسلاید 80</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 80" loading="lazy" src="supplements/ch8/assets/slide-080-1.png"/></p></details><details id="source-81"><summary>اسلاید 81</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 81" loading="lazy" src="supplements/ch8/assets/slide-081-1.png"/></p></details><details id="source-82"><summary>اسلاید 82</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 82" loading="lazy" src="supplements/ch8/assets/slide-082-1.png"/></p></details><details id="source-83"><summary>اسلاید 83</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 83" loading="lazy" src="supplements/ch8/assets/slide-083-1.png"/></p></details><details id="source-84"><summary>اسلاید 84</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 84" loading="lazy" src="supplements/ch8/assets/slide-084-1.png"/></p></details><details id="source-85"><summary>اسلاید 85</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 85" loading="lazy" src="supplements/ch8/assets/slide-085-1.png"/></p></details><details id="source-86"><summary>اسلاید 86</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 86" loading="lazy" src="supplements/ch8/assets/slide-086-1.png"/></p></details><details id="source-87"><summary>اسلاید 87</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 87" loading="lazy" src="supplements/ch8/assets/slide-087-1.png"/></p></details><details id="source-88"><summary>اسلاید 88</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 88" loading="lazy" src="supplements/ch8/assets/slide-088-1.png"/></p></details><details id="source-89"><summary>اسلاید 89</summary><pre><code class="language-text">How do I read out the editing operations that transform OSLO into SNOW?
+</code></pre><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 89" loading="lazy" src="supplements/ch8/assets/slide-089-1.png"/></p></details><details id="source-90"><summary>اسلاید 90</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 90" loading="lazy" src="supplements/ch8/assets/slide-090-1.png"/></p><p><img alt="جدول عملیات — اسلاید 90" loading="lazy" src="supplements/ch8/assets/slide-090-2.png"/></p></details><details id="source-91"><summary>اسلاید 91</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 91" loading="lazy" src="supplements/ch8/assets/slide-091-1.png"/></p><p><img alt="جدول عملیات — اسلاید 91" loading="lazy" src="supplements/ch8/assets/slide-091-2.png"/></p></details><details id="source-92"><summary>اسلاید 92</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 92" loading="lazy" src="supplements/ch8/assets/slide-092-1.png"/></p><p><img alt="جدول عملیات — اسلاید 92" loading="lazy" src="supplements/ch8/assets/slide-092-2.png"/></p></details><details id="source-93"><summary>اسلاید 93</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 93" loading="lazy" src="supplements/ch8/assets/slide-093-1.png"/></p><p><img alt="جدول عملیات — اسلاید 93" loading="lazy" src="supplements/ch8/assets/slide-093-2.png"/></p></details><details id="source-94"><summary>اسلاید 94</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 94" loading="lazy" src="supplements/ch8/assets/slide-094-1.png"/></p><p><img alt="جدول عملیات — اسلاید 94" loading="lazy" src="supplements/ch8/assets/slide-094-2.png"/></p></details><details id="source-95"><summary>اسلاید 95</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 95" loading="lazy" src="supplements/ch8/assets/slide-095-1.png"/></p></details><details id="source-96"><summary>اسلاید 96</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 96" loading="lazy" src="supplements/ch8/assets/slide-096-1.png"/></p><p><img alt="جدول عملیات — اسلاید 96" loading="lazy" src="supplements/ch8/assets/slide-096-2.png"/></p></details><details id="source-97"><summary>اسلاید 97</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 97" loading="lazy" src="supplements/ch8/assets/slide-097-1.png"/></p><p><img alt="جدول عملیات — اسلاید 97" loading="lazy" src="supplements/ch8/assets/slide-097-2.png"/></p></details><details id="source-98"><summary>اسلاید 98</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 98" loading="lazy" src="supplements/ch8/assets/slide-098-1.png"/></p><p><img alt="جدول عملیات — اسلاید 98" loading="lazy" src="supplements/ch8/assets/slide-098-2.png"/></p></details><details id="source-99"><summary>اسلاید 99</summary><p><img alt="ماتریس فاصلهٔ ویرایشی — اسلاید 99" loading="lazy" src="supplements/ch8/assets/slide-099-1.png"/></p><p><img alt="جدول عملیات — اسلاید 99" loading="lazy" src="supplements/ch8/assets/slide-099-2.png"/></p></details></details></section><section id="spelling"><h2 id="slide-6">پیشنهاد املا: نامزد، رتبه و بافت</h2><p>برای <code>bordroom</code> هفت bigram داخلی داریم: <code>bo or rd dr ro oo om</code>. برخلاف مثال wildcard، مرز اضافه نمی‌کنیم. هم‌پوشانی گرم‌ها راهی سریع برای ساخت فهرست کوتاه است؛ سپس می‌توان نامزدها را با فاصلهٔ ویرایشی و بسامد سنجید.</p>
+<p>در <code>flew form munich</code> هر کلمه جداگانه معتبر است، اما با تغییر تنها یک جایگاه و مقایسهٔ فراوانی عبارت‌ها، <code>flew from munich</code> در مثال درس برنده می‌شود. با ۷، ۲۰ و ۳ جایگزین، این راهبرد ۳۰ عبارت اصلاح‌شده می‌سازد، نه حاصل‌ضرب سه عدد. سابقهٔ پرس‌وجوها می‌تواند هزینهٔ اجرای مجدد همهٔ عبارت‌ها را کم کند. اگر شواهد ضعیف‌اند، پیشنهاد دادن به کاربر از جایگزینی خاموش مناسب‌تر است.</p>
+<p>تصحیح‌گر تاریخی Norvig ابتدا از <code>big.txt</code> فراوانی می‌آموزد. با شکستن واژه در مرزهای ممکن، حذف، درج، تعویض دو حرف مجاور و جایگزینی را می‌آزماید. نخستین گروه ناتهی را از میان خود واژهٔ شناخته‌شده، نامزدهای شناخته‌شدهٔ یک ویرایش، سپس دو ویرایش و سرانجام خود ورودی انتخاب می‌کند؛ درون آن گروه بسامد تعیین‌کننده است.</p>
+<details><summary>متن و شکل‌های منبع · اسلایدهای 100 تا 107</summary><details id="source-100"><summary>اسلاید 100</summary><pre><code class="language-text">Outline
+Recap 
+ Dictionaries
+ Wildcard queries
+ Edit distance
+Spelling correction
+Soundex
+</code></pre></details><details id="source-101"><summary>اسلاید 101</summary><pre><code class="language-text">Spelling correction
+Now that we can compute edit distance: how to use it for isolated word spelling correction – this is the last slide in this section.
+k-gram indexes for isolated word spelling correction.
+Context-sensitive spelling correction
+General issues
+</code></pre></details><details id="source-102"><summary>اسلاید 102</summary><pre><code class="language-text">k-gram indexes for spelling correction
+Enumerate all k-grams in the query term
+Example: bigram index, misspelled word bordroom
+Bigrams: bo, or, rd, dr, ro, oo, om
+Use the k-gram index to retrieve “correct” words that match query term k-grams
+Threshold by number of matching k-grams
+E.g., only vocabulary terms that differ by at most 3 k-grams
+</code></pre></details><details id="source-103"><summary>اسلاید 103</summary><pre><code class="language-text">k-gram indexes for spelling correction: bordroom
+</code></pre><p><img alt="k-gram indexes for spelling correction: bordroom — اسلاید 103" loading="lazy" src="supplements/ch8/assets/slide-103-1.png"/></p></details><details id="source-104"><summary>اسلاید 104</summary><pre><code class="language-text">Context-sensitive spelling correction
+Our example was: an asteroid that fell form the sky
+How can we correct form here?
+One idea: hit-based spelling correction
+Retrieve “correct” terms close to each query term
+for flew form munich: flea for flew, from for form, munch for
+munich
+Now try all possible resulting phrases as queries with one word “fixed” at a time
+Try query “flea form munich”
+Try query “flew from munich”
+Try query “flew form munch”
+The correct query “flew from munich” has the most hits.
+Suppose we have 7 alternatives for flew, 20 for form and 3 for munich, how many “corrected” phrases will we enumerate?
+</code></pre></details><details id="source-105"><summary>اسلاید 105</summary><pre><code class="language-text">Context-sensitive spelling correction
+The “hit-based” algorithm we just outlined is not very efficient.
+More efficient alternative: look at “collection” of queries, not documents
+</code></pre></details><details id="source-106"><summary>اسلاید 106</summary><pre><code class="language-text">General issues in spelling correction
+User interface
+automatic vs. suggested correction
+Did you mean only works for one suggestion.
+What about multiple possible corrections?
+Tradeoff: simple vs. powerful UI
+Cost
+Spelling correction is potentially expensive.
+Avoid running on every query?
+Maybe just on queries that match few documents.
+Guess: Spelling correction of major search engines is efficient enough to be run on every query.
+</code></pre></details><details id="source-107"><summary>اسلاید 107</summary><pre><code class="language-text">Exercise: Understand Peter Norvig’s 
+spelling corrector
+</code></pre><p><img alt="Exercise: Understand Peter Norvig’s
+spelling corrector — اسلاید 107" loading="lazy" src="supplements/ch8/assets/slide-107-1.png"/></p></details></details></section><section id="soundex"><h2 id="slide-7">Soundex: شباهت آوایی با ورودی لاتین</h2><p>در قرارداد این درس، حرف نخست ثابت می‌ماند. برای بقیهٔ حروف از نگاشت زیر استفاده می‌کنیم:</p>
+<pre><code class="language-text">AEIOUHWY → 0     BFPV → 1      CGJKQSXZ → 2
+DT → 3           L → 4         MN → 5        R → 6
+</code></pre>
+<p>اول رقم‌های برابرِ مجاور را یکی می‌کنیم، سپس صفرها را حذف می‌کنیم. در پایان با افزودن صفر یا کوتاه‌کردن، سه رقم کنار حرف اول نگه می‌داریم. در <code>HERMAN</code> رشتهٔ <code>06505</code> پیش از حذف صفر هیچ رقم تکراری مجاور ندارد؛ پاسخ <code>H655</code> است. <code>HERMANN</code> هم همین کد را دارد. این برخورد دلیل یکی بودن دو نام نیست؛ کد آوایی فقط برای تولید نامزدهای مشابه است. جدول برای خط فارسی تعریف نشده است.</p>
+<p><strong>جمع‌بندی:</strong> wildcard از الگویی صریح پیروی می‌کند؛ تصحیح املایی از شواهد نوشتاری و بافت استفاده می‌کند؛ Soundex تلفظ تقریبی را با یک کد کوتاه نمایندگی می‌کند.</p>
+<div id="sound-lab"></div><details><summary>متن و شکل‌های منبع · اسلایدهای 108 تا 115</summary><details id="source-108"><summary>اسلاید 108</summary><pre><code class="language-text">Outline
+Recap 
+ Dictionaries
+ Wildcard queries
+ Edit distance
+Spelling correction
+Soundex
+</code></pre></details><details id="source-109"><summary>اسلاید 109</summary><pre><code class="language-text">Soundex
+Soundex is the basis for finding phonetic (as opposed to orthographic) alternatives.
+Example: chebyshev / tchebyscheff
+Algorithm:
+Turn every token to be indexed into a 4-character reduced form
+Do the same with query terms
+Build and search an index on the reduced forms
+</code></pre></details><details id="source-110"><summary>اسلاید 110</summary><pre><code class="language-text">Soundex algorithm
+Retain the first letter of the term.
+Change all occurrences of the following letters to ’0’ (zero): A, E, I, O, U, H, W, Y
+Change letters to digits as follows:
+B, F, P, V to 1
+C, G, J, K, Q, S, X, Z to 2
+D,T to 3
+L to 4
+M, N to 5
+R to 6
+Repeatedly remove one out of each pair of consecutive identical digits
+Remove all zeros from the resulting string; pad the resulting string
+     with trailing zeros and return the first four positions, which will
+     consist of a letter followed by three digits
+</code></pre></details><details id="source-111"><summary>اسلاید 111</summary><pre><code class="language-text">Example: Soundex of HERMAN
+Retain H
+ERMAN → 0RM0N
+0RM0N → 06505
+06505 → 06505
+06505 → 655
+Return H655
+Note: HERMANN will generate the same code
+</code></pre></details><details id="source-112"><summary>اسلاید 112</summary><pre><code class="language-text">How useful is Soundex?
+Not very – for information retrieval
+Ok for “high recall” tasks in other applications (e.g., Interpol)
+Zobel and Dart (1996) suggest better alternatives for phonetic matching in IR.
+</code></pre></details><details id="source-113"><summary>اسلاید 113</summary><pre><code class="language-text">Exercise
+Compute Soundex code of your last name
+</code></pre></details><details id="source-114"><summary>اسلاید 114</summary><pre><code class="language-text">Take-away
+Tolerant retrieval: What to do if there is no exact match between query term and document term
+Wildcard queries
+Spelling correction
+</code></pre></details><details id="source-115"><summary>اسلاید 115</summary><pre><code class="language-text">Resources
+Chapter 3 of IIR
+Resources at http://ifnlp.org/ir
+Soundex demo
+Levenshtein distance demo
+Peter Norvig’s spelling corrector
+</code></pre></details></details></section><section class="self-test"><h2>خودت را بسنج</h2><details><summary>اگر فقط مکان‌های TO و BE را داشته باشیم، آیا کل عبارت شش‌واژه‌ای ثابت می‌شود؟</summary><p>خیر؛ مکان or و not و فاصله‌های نسبی همهٔ رخدادها نیز لازم است.</p></details><details><summary>چرا moon در نامزدهای mon* دیده می‌شود؟</summary><p>هر سه bigram را دارد، اما پیشوند mon را ندارد و در پالایش نهایی رد می‌شود.</p></details><details><summary>آیا فاصلهٔ ۳ یعنی دقیقاً یک مسیر بهینه داریم؟</summary><p>خیر. برای cat → catcat چند هم‌ترازی با سه درج وجود دارد.</p></details><details><summary>چرا form را به تنهایی نمی‌توان غلط اعلام کرد؟</summary><p>خودش واژهٔ معتبری است؛ بافتی مانند flew from munich به تصمیم کمک می‌کند.</p></details></section><label class="complete"><input type="checkbox" data-done="8"> این فصل را مطالعه کردم</label><div class="study-progress"><label for="meter8" data-progress-label>پیشرفت مطالعه</label><progress id="meter8" data-study-meter max="8" value="0"></progress><small data-progress-note></small></div><nav class="chapter-nav"><a href="chapter-7.html">→ فصل قبل</a><a href="review.html">مرور نهایی ←</a></nav></article></main><footer class="site-footer">بازیابی اطلاعات · بازنویسی آموزشی منابع ارسالی؛ مثال‌های افزوده برای یادگیری هستند.</footer></body></html>

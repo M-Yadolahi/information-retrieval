@@ -1,5 +1,6 @@
 // Local storage on hosted sites; timestamped navigation hand-off for file:// pages.
 (() => {
+  const total = 8;
   const key = 'ir-study-completed-v1';
   const fileMode = location.protocol === 'file:';
   const scope = new URL('.', location.href).href;
@@ -9,7 +10,7 @@
   function clean(value) {
     if (Array.isArray(value)) value = {done: value, time: 0}; // migrate v1
     if (!value || !Array.isArray(value.done) || !Number.isFinite(value.time)) return null;
-    return {done: [...new Set(value.done.filter(n => Number.isInteger(n) && n >= 1 && n <= 7))], time: value.time};
+    return {done: [...new Set(value.done.filter(n => Number.isInteger(n) && n >= 1 && n <= total))], time: value.time};
   }
   function consider(value) {
     const candidate = clean(value);
@@ -53,9 +54,9 @@
   };
   function update() {
     document.querySelectorAll('[data-done]').forEach(box => { box.checked = state.done.includes(Number(box.dataset.done)); });
-    document.querySelectorAll('[data-study-meter], #study-meter').forEach(meter => { meter.value = state.done.length; });
+    document.querySelectorAll('[data-study-meter], #study-meter').forEach(meter => { meter.max = total; meter.value = state.done.length; });
     document.querySelectorAll('[data-progress-label], #progress-label').forEach(label => {
-      label.textContent = `${state.done.length.toLocaleString('fa-IR')} از ۷ فصل (${Math.round(state.done.length / 7 * 100).toLocaleString('fa-IR')}٪)`;
+      label.textContent = `${state.done.length.toLocaleString('fa-IR')} از ${total.toLocaleString('fa-IR')} فصل (${Math.round(state.done.length / total * 100).toLocaleString('fa-IR')}٪)`;
     });
     document.querySelectorAll('[data-progress-note], #progress-note').forEach(note => {
       note.textContent = !saved ? 'ذخیرهٔ دائمی در این مرورگر در دسترس نیست؛ برای نگهداری بهتر پیشرفت، سایت را روی میزبان محلی یا آنلاین باز کنید.' : fileMode ? 'در حالت فایل، برای حفظ پیشرفت از لینک‌های داخل جزوه و همان زبانه استفاده کنید. آدرس صفحه نیز پیشرفت را همراه دارد.' : 'پیشرفت در همین مرورگر ذخیره می‌شود؛ میان دستگاه‌ها همگام نیست.';
